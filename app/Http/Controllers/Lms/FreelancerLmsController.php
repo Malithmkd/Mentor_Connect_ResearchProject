@@ -1,0 +1,220 @@
+<?php
+
+namespace App\Http\Controllers\Lms;
+
+use App\Http\Controllers\Controller;
+use App\Models\Enrollment;
+use App\Models\Lesson;
+use App\Models\LessonProgress;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
+
+/**
+ * FreelancerLmsController
+ * Provides the freelancer's view of their enrolled courses, lesson viewer,
+ * and lesson completion tracking.
+ */
+class FreelancerLmsController extends Controller
+{
+    /**
+     * Dashboard: show relationships (all states) + enrolled courses.
+     */
+    public function index(): View
+    {
+        $freelancerId = auth()->id();
+
+        // Accepted relationships — grouped by whether courses are enrolled yet
+        $acceptedRelationships = \App\Models\MentorshipRelationship::with(['mentor', 'booking', 'courses'])
+            ->forFreelancer($freelancerId)
+            ->accepted()
+            ->latest()
+            ->get();
+
+        // Pending relationships (still waiting for mentor to accept)
+        $pendingRelationships = \App\Models\MentorshipRelationship::with(['mentor', 'booking'])
+            ->forFreelancer($freelancerId)
+            ->pending()
+            ->latest()
+            ->get();
+
+        // Enrolled courses (courses that have been published and enrolled)
+        $enrollments = Enrollment::with([
+                'course.modules.lessons',
+                'course.relationship.mentor',
+                'lessonProgress',
+            ])
+            ->forFreelancer($freelancerId)
+            ->latest()
+            ->get();
+
+        return view('freelancer.lms.index', compact(
+            'acceptedRelationships',
+            'pendingRelationships',
+            'enrollments'
+        ));
+    }
+
+    /**
+     * Course overview: modules accordion + lesson list with per-lesson completion state.
+     */
+    public function showCourse(Enrollment $enrollment): View
+    {
+        abort_if(auth()->id() !== $enrollment->freelancer_id, 403);
+
+        $enrollment->load([
+            'course.modules.lessons',
+            'course.relationship.mentor',
+            'lessonProgress',
+        ]);
+
+        // Build a Set of completed lesson IDs for quick lookup in the view
+        $completedLessonIds = $enrollment->lessonProgress
+            ->whereNotNull('completed_at')
+            ->pluck('lesson_id')
+            ->toArray();
+
+        return view('freelancer.lms.course', compact('enrollment', 'completedLessonIds'));
+    }
+
+    /**
+     * Lesson viewer: title, content body, optional video embed.
+     */
+    public function showLesson(Enrollment $enrollment, Lesson $lesson): View
+    {
+        abort_if(auth()->id() !== $enrollment->freelancer_id, 403);
+
+        // Ensure lesson belongs to this enrollment's course
+        abort_unless(
+            $lesson->module->course_id === $enrollment->course_id,
+            404
+        );
+
+        $enrollment->load(['course.relationship.mentor', 'lessonProgress']);
+
+        $completedLessonIds = $enrollment->lessonProgress
+            ->whereNotNull('completed_at')
+            ->pluck('lesson_id')
+            ->toArray();
+
+        $isCompleted = in_array($lesson->id, $completedLessonIds);
+
+        // Previous / Next lesson for navigation
+        $allLessons = $enrollment->course
+            ->lessons()
+            ->orderBy('course_modules.sort_order')
+            ->orderBy('lessons.sort_order')
+            ->get();
+
+        $currentIndex = $allLessons->search(fn($l) => $l->id === $lesson->id);
+        $prevLesson   = $currentIndex > 0 ? $allLessons[$currentIndex - 1] : null;
+        $nextLesson   = $currentIndex < $allLessons->count() - 1 ? $allLessons[$currentIndex + 1] : null;
+
+        return view('freelancer.lms.lesson', compact(
+            'enrollment', 'lesson', 'isCompleted', 'prevLesson', 'nextLesson'
+        ));
+    }
+
+    /**
+     * Mark a lesson as complete, and mark the enrollment complete if it's the last lesson.
+     */
+    public function completeLesson(Enrollment $enrollment, Lesson $lesson): RedirectResponse
+    {
+        abort_if(auth()->id() !== $enrollment->freelancer_id, 403);
+
+        abort_unless(
+            $lesson->module->course_id === $enrollment->course_id,
+            404
+        );
+
+        // Upsert the progress record
+        LessonProgress::updateOrCreate(
+            [
+                'enrollment_id' => $enrollment->id,
+                'lesson_id'     => $lesson->id,
+            ],
+            [
+                'freelancer_id' => auth()->id(),
+                'completed_at'  => now(),
+            ]
+        );
+
+        // Check if all lessons are now complete → mark enrollment done
+        $totalLessons     = $enrollment->course->lessons()->count();
+        $completedLessons = $enrollment->lessonProgress()->whereNotNull('completed_at')->count();
+
+        if ($completedLessons >= $totalLessons && !$enrollment->isCompleted()) {
+            $enrollment->update(['completed_at' => now()]);
+        }
+
+        return back()->with('success', 'Lesson marked as complete! 🎉');
+    }
+
+    /**
+     * Progress analytics page for a single enrollment.
+     * Provides pre-computed chart data (JSON) for Chart.js.
+     */
+    public function showProgress(Enrollment $enrollment): View
+    {
+        abort_if(auth()->id() !== $enrollment->freelancer_id, 403);
+
+        $enrollment->load([
+            'course.modules.lessons',
+            'course.relationship.mentor',
+            'lessonProgress',
+        ]);
+
+        $completedIds = $enrollment->lessonProgress
+            ->whereNotNull('completed_at')
+            ->pluck('lesson_id')
+            ->toArray();
+
+        // ── Per-module bar chart data ─────────────────────────────────────
+        $moduleLabels    = [];
+        $moduleTotals    = [];
+        $moduleCompleted = [];
+
+        foreach ($enrollment->course->modules as $module) {
+            $moduleLabels[]    = $module->title;
+            $total             = $module->lessons->count();
+            $done              = $module->lessons->whereIn('id', $completedIds)->count();
+            $moduleTotals[]    = $total;
+            $moduleCompleted[] = $done;
+        }
+
+        // ── Overall doughnut ─────────────────────────────────────────────
+        $totalLessons     = array_sum($moduleTotals);
+        $completedLessons = array_sum($moduleCompleted);
+        $remaining        = max(0, $totalLessons - $completedLessons);
+
+        // ── 30-day activity line chart ────────────────────────────────────
+        $days         = collect(range(29, 0))->map(fn($d) => now()->subDays($d)->format('M d'));
+        $activityData = collect(range(29, 0))->map(function ($d) use ($enrollment) {
+            $date = now()->subDays($d)->toDateString();
+            return $enrollment->lessonProgress
+                ->whereNotNull('completed_at')
+                ->filter(fn($p) => $p->completed_at->toDateString() === $date)
+                ->count();
+        });
+
+        // Running cumulative for the line chart
+        $cumulative = [];
+        $running    = 0;
+        foreach ($activityData as $count) {
+            $running     += $count;
+            $cumulative[] = $running;
+        }
+
+        return view('freelancer.lms.progress', compact(
+            'enrollment',
+            'totalLessons',
+            'completedLessons',
+            'remaining',
+            'moduleLabels',
+            'moduleTotals',
+            'moduleCompleted',
+            'days',
+            'cumulative'
+        ));
+    }
+}
+

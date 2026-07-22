@@ -1,190 +1,405 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
-@section('title', 'Admin Dashboard')
+@section('title', 'Dashboard')
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+@endpush
 
 @section('content')
-<section class="dashboard">
-    <div class="dashboard__inner">
-        <header class="dashboard__header">
-            <div>
-                <h1 class="dashboard__title">Admin Dashboard</h1>
-                <p class="dashboard__subtitle">Platform overview and management.</p>
-            </div>
-        </header>
-
-        <div class="stat-cards" style="grid-template-columns: repeat(2, 1fr); gap: var(--space-3);">
-            <div class="stat-card">
-                <div class="stat-card__icon stat-card__icon--blue"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2a6 6 0 00-6 6v2H2v8h16v-8h-2V8a6 6 0 00-5-5.916V2h-1z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M10 14v.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
-                <div class="stat-card__info"><span class="stat-card__value">{{ $stats['users'] }}</span><span class="stat-card__label">Total Users</span></div>
-            </div>
-            <a href="{{ route('admin.users.mentors') }}" class="stat-card stat-card--link">
-                <div class="stat-card__icon stat-card__icon--green"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="7" r="5" stroke="currentColor" stroke-width="1.5"/><path d="M2 18c0-4.418 3.582-8 8-8s8 3.582 8 8" stroke="currentColor" stroke-width="1.5"/></svg></div>
-                <div class="stat-card__info"><span class="stat-card__value">{{ $stats['mentors'] }}</span><span class="stat-card__label">Mentors <span class="stat-card__cta">→ Manage</span></span></div>
-            </a>
-            <a href="{{ route('admin.users.freelancers') }}" class="stat-card stat-card--link">
-                <div class="stat-card__icon stat-card__icon--purple"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2l2.5 5.08L18 7.9l-4 3.9.94 5.5L10 14.77l-4.94 2.6L6 11.8l-4-3.9 5.5-.82L10 2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-                <div class="stat-card__info"><span class="stat-card__value">{{ $stats['freelancers'] }}</span><span class="stat-card__label">Freelancers <span class="stat-card__cta">→ Manage</span></span></div>
-            </a>
-            <a href="{{ route('admin.approvals.index') }}" class="stat-card stat-card--link {{ $stats['pending_approvals'] > 0 ? 'stat-card--alert' : '' }}">
-                <div class="stat-card__icon stat-card__icon--amber"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5"/><path d="M10 6v5l3 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
-                <div class="stat-card__info">
-                    <span class="stat-card__value">{{ $stats['pending_approvals'] }}</span>
-                    <span class="stat-card__label">Pending Approvals <span class="stat-card__cta">→ Review</span></span>
-                </div>
-            </a>
-            <div class="stat-card">
-                <div class="stat-card__icon stat-card__icon--blue"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M2 4h16v12H2z" stroke="currentColor" stroke-width="1.5"/><path d="M6 8h8M6 12h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
-                <div class="stat-card__info"><span class="stat-card__value">{{ $stats['gigs'] }}</span><span class="stat-card__label">Total Gigs</span></div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-card__icon stat-card__icon--green"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M5 10l3 3 7-7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-                <div class="stat-card__info"><span class="stat-card__value">{{ $stats['bookings'] }}</span><span class="stat-card__label">Bookings</span></div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-card__icon stat-card__icon--purple"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2v16M2 10h16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
-                <div class="stat-card__info"><span class="stat-card__value">${{ number_format($stats['revenue'], 2) }}</span><span class="stat-card__label">Revenue</span></div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-card__icon stat-card__icon--amber"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2l2.5 5.08L18 7.9l-4 3.9.94 5.5L10 14.77l-4.94 2.6L6 11.8l-4-3.9 5.5-.82L10 2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-                <div class="stat-card__info"><span class="stat-card__value">{{ $stats['average_rating'] }}</span><span class="stat-card__label">Avg Rating</span></div>
-            </div>
-        </div>
-
-        <div class="dashboard__grid">
-            <div class="panel">
-                <div class="panel__header"><h2 class="panel__title">Recent Users</h2></div>
-                <div class="panel__body">
-                    @if ($recentUsers->count() > 0)
-                        <div class="booking-list">
-                            @foreach ($recentUsers as $user)
-                                <div class="booking-item">
-                                    <div class="booking-item__avatar">{{ strtoupper(substr($user->first_name, 0, 1)) }}</div>
-                                    <div class="booking-item__info">
-                                        <p class="booking-item__title">{{ $user->full_name }}</p>
-                                        <p class="booking-item__subtitle">{{ $user->email }}</p>
-                                    </div>
-                                    <span class="badge badge--{{ $user->role->value === 'admin' ? 'purple' : ($user->role->value === 'mentor' ? 'info' : 'neutral') }}">{{ $user->role->label() }}</span>
-                                </div>
-                            @endforeach
-                        </div>
-                    @else
-                        <div class="empty"><p class="empty__text">No users yet.</p></div>
-                    @endif
-                </div>
-            </div>
-            <div class="panel">
-                <div class="panel__header"><h2 class="panel__title">Recent Bookings</h2></div>
-                <div class="panel__body">
-                    @if ($recentBookings->count() > 0)
-                        <div class="booking-list">
-                            @foreach ($recentBookings as $booking)
-                                <div class="booking-item">
-                                    <div class="booking-item__info">
-                                        <p class="booking-item__title">{{ Str::limit($booking->gig->title, 30) }}</p>
-                                        <p class="booking-item__subtitle">{{ $booking->freelancer->full_name }} &rarr; {{ $booking->mentor->full_name }}</p>
-                                    </div>
-                                    <span class="badge badge--{{ $booking->status->colorClass() }}">{{ $booking->status->label() }}</span>
-                                </div>
-                            @endforeach
-                        </div>
-                    @else
-                        <div class="empty"><p class="empty__text">No bookings yet.</p></div>
-                    @endif
-                </div>
-            </div>
-        </div>
-
-        {{-- Quick Action buttons --}}
-        <div class="quick-actions">
-            <a href="{{ route('admin.approvals.index') }}" class="quick-action-btn quick-action-btn--green"
-               style="position:relative;">
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M5 10l3 3 7-7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                Approve Registrations
-                @if ($stats['pending_approvals'] > 0)
-                    <span style="background:#ef4444;color:#fff;border-radius:99px;font-size:0.7rem;
-                                 padding:1px 6px;position:absolute;top:-6px;right:-6px;font-weight:700;">
-                        {{ $stats['pending_approvals'] }}
-                    </span>
-                @endif
-            </a>
-            <a href="{{ route('admin.users.mentors') }}" class="quick-action-btn quick-action-btn--blue">
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="7" r="5" stroke="currentColor" stroke-width="1.5"/><path d="M2 18c0-4.418 3.582-8 8-8s8 3.582 8 8" stroke="currentColor" stroke-width="1.5"/></svg>
-                View All Mentors
-            </a>
-            <a href="{{ route('admin.users.freelancers') }}" class="quick-action-btn quick-action-btn--purple">
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2l2.5 5.08L18 7.9l-4 3.9.94 5.5L10 14.77l-4.94 2.6L6 11.8l-4-3.9 5.5-.82L10 2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                View All Freelancers
-            </a>
-            <a href="{{ route('admin.users.mentors', ['max_rating' => 2, 'sort' => 'rating_asc']) }}" class="quick-action-btn quick-action-btn--danger">
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2l7.66 13.5H2.34L10 2z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M10 8v4M10 14v.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-                Low-Rated Mentors
-            </a>
-            <a href="{{ route('admin.users.freelancers', ['max_rating' => 2, 'sort' => 'rating_asc']) }}" class="quick-action-btn quick-action-btn--amber">
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2l7.66 13.5H2.34L10 2z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M10 8v4M10 14v.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-                Low-Rated Freelancers
-            </a>
-        </div>
-
+{{-- Page Header --}}
+<div class="adm-page-header">
+    <div>
+        <h1 class="adm-page-title">Admin Dashboard</h1>
+        <p class="adm-page-subtitle">Platform overview, metrics, and management actions.</p>
     </div>
-</section>
+</div>
 
-<style>
-/* ── Stat-card link variant ── */
-.stat-card--link {
-    text-decoration: none;
-    color: inherit;
-    cursor: pointer;
-    transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
-}
-.stat-card--link:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0,0,0,.12);
-    border-color: var(--primary, #4f46e5);
-}
-.stat-card__cta {
-    font-size: 0.7rem;
-    color: var(--primary, #4f46e5);
-    font-weight: 600;
-    margin-left: 4px;
-    opacity: 0;
-    transition: opacity .15s;
-}
-.stat-card--link:hover .stat-card__cta { opacity: 1; }
+{{-- Statistics Cards (Top Grid) --}}
+<div class="adm-stat-grid">
+    {{-- Total Users --}}
+    <a href="{{ route('admin.users.mentors') }}" class="adm-stat-card">
+        <div class="adm-stat-card__icon adm-stat-card__icon--blue">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2"/>
+                <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+        </div>
+        <div class="adm-stat-card__body">
+            <div class="adm-stat-card__value">{{ $stats['users'] }}</div>
+            <div class="adm-stat-card__label">Total Users</div>
+        </div>
+        <span class="adm-stat-card__arrow">→</span>
+    </a>
 
-/* ── Quick actions row ── */
-.quick-actions {
-    display: flex;
-    gap: var(--space-3);
-    flex-wrap: wrap;
-    margin-top: var(--space-5);
-}
-.quick-action-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-2);
-    padding: 10px 18px;
-    border-radius: 8px;
-    font-size: 0.875rem;
-    font-weight: 600;
-    text-decoration: none;
-    transition: opacity .15s, transform .15s;
-    color: #fff;
-}
-.quick-action-btn:hover { opacity: .9; transform: translateY(-1px); }
-.quick-action-btn--blue   { background: #3b82f6; }
-.quick-action-btn--purple { background: #8b5cf6; }
-.quick-action-btn--danger { background: #ef4444; }
-.quick-action-btn--amber  { background: #f59e0b; }
-.quick-action-btn--green  { background: #10b981; }
+    {{-- Mentors --}}
+    <a href="{{ route('admin.users.mentors') }}" class="adm-stat-card">
+        <div class="adm-stat-card__icon adm-stat-card__icon--green">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="8" r="5" stroke="currentColor" stroke-width="2"/>
+                <path d="M3 21v-2a7 7 0 0114 0v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M16 11l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </div>
+        <div class="adm-stat-card__body">
+            <div class="adm-stat-card__value">{{ $stats['mentors'] }}</div>
+            <div class="adm-stat-card__label">Mentors</div>
+        </div>
+        <span class="adm-stat-card__arrow">→</span>
+    </a>
 
-/* ── Stat-card alert pulse (pending approvals) ── */
-.stat-card--alert {
-    border-color: rgba(239,68,68,.4) !important;
-    animation: card-pulse 2s ease-in-out infinite;
-}
-@keyframes card-pulse {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,.2); }
-    50%       { box-shadow: 0 0 0 6px rgba(239,68,68,0); }
-}
-</style>
+    {{-- Freelancers --}}
+    <a href="{{ route('admin.users.freelancers') }}" class="adm-stat-card">
+        <div class="adm-stat-card__icon adm-stat-card__icon--purple">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                <path d="M16 16v1a2 2 0 01-2 2H3a2 2 0 01-2-2V7a2 2 0 012-2h11a2 2 0 012 2v1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M18 8h4a1 1 0 011 1v6a1 1 0 01-1 1h-4l-3 3V5l3 3z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+            </svg>
+        </div>
+        <div class="adm-stat-card__body">
+            <div class="adm-stat-card__value">{{ $stats['freelancers'] }}</div>
+            <div class="adm-stat-card__label">Freelancers</div>
+        </div>
+        <span class="adm-stat-card__arrow">→</span>
+    </a>
+
+    {{-- Pending Approvals --}}
+    <a href="{{ route('admin.approvals.index') }}" class="adm-stat-card {{ $stats['pending_approvals'] > 0 ? 'adm-stat-card--alert' : '' }}">
+        <div class="adm-stat-card__icon adm-stat-card__icon--amber">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                <path d="M12 6v6l4 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+        </div>
+        <div class="adm-stat-card__body">
+            <div class="adm-stat-card__value">{{ $stats['pending_approvals'] }}</div>
+            <div class="adm-stat-card__label">Pending Approvals</div>
+        </div>
+        <span class="adm-stat-card__arrow">→</span>
+    </a>
+
+    {{-- Total Gigs --}}
+    <div class="adm-stat-card">
+        <div class="adm-stat-card__icon adm-stat-card__icon--indigo">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                <path d="M4 6a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6z" stroke="currentColor" stroke-width="2"/>
+                <path d="M8 10h8M8 14h5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+        </div>
+        <div class="adm-stat-card__body">
+            <div class="adm-stat-card__value">{{ $stats['gigs'] }}</div>
+            <div class="adm-stat-card__label">Total Gigs</div>
+        </div>
+    </div>
+
+    {{-- Total Bookings --}}
+    <div class="adm-stat-card">
+        <div class="adm-stat-card__icon adm-stat-card__icon--blue">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+        </div>
+        <div class="adm-stat-card__body">
+            <div class="adm-stat-card__value">{{ $stats['bookings'] }}</div>
+            <div class="adm-stat-card__label">Total Bookings</div>
+        </div>
+    </div>
+</div>
+
+{{-- Charts Section --}}
+<div class="adm-grid-3" style="margin-bottom: 24px;">
+    {{-- User Growth --}}
+    <div class="adm-card">
+        <div class="adm-card__header">
+            <div>
+                <h2 class="adm-card__title">User Growth</h2>
+                <p class="adm-card__subtitle">New registrations (Last 7 days)</p>
+            </div>
+        </div>
+        <div class="adm-card__body">
+            <div class="adm-chart-wrap">
+                <canvas id="userGrowthChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    {{-- Booking Statistics --}}
+    <div class="adm-card">
+        <div class="adm-card__header">
+            <div>
+                <h2 class="adm-card__title">Booking Statistics</h2>
+                <p class="adm-card__subtitle">Breakdown by current status</p>
+            </div>
+        </div>
+        <div class="adm-card__body">
+            <div class="adm-chart-wrap">
+                <canvas id="bookingStatsChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    {{-- Mentor vs Freelancer Distribution --}}
+    <div class="adm-card">
+        <div class="adm-card__header">
+            <div>
+                <h2 class="adm-card__title">User Distribution</h2>
+                <p class="adm-card__subtitle">Mentors vs Freelancers</p>
+            </div>
+        </div>
+        <div class="adm-card__body">
+            <div class="adm-chart-wrap">
+                <canvas id="userDistChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- Two-Column Grid: Recent Users & Recent Bookings --}}
+<div class="adm-grid-2" style="margin-bottom: 24px;">
+    {{-- Recent Users Panel --}}
+    <div class="adm-card">
+        <div class="adm-card__header">
+            <div>
+                <h2 class="adm-card__title">Recent Users</h2>
+                <p class="adm-card__subtitle">Latest registered accounts</p>
+            </div>
+            <a href="{{ route('admin.users.mentors') }}" class="adm-btn adm-btn--ghost adm-btn--sm">View All</a>
+        </div>
+        <div class="adm-table-wrap">
+            @if($recentUsers->count() > 0)
+                <table class="adm-table">
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($recentUsers as $user)
+                            <tr>
+                                <td>
+                                    <div class="adm-user-row">
+                                        <div class="adm-user-initials">{{ strtoupper(substr($user->first_name, 0, 1)) }}</div>
+                                        <div>
+                                            <div class="adm-user-name">{{ $user->full_name }}</div>
+                                            <div class="adm-user-email">{{ $user->email }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="adm-badge adm-badge--{{ $user->role->value === 'admin' ? 'purple' : ($user->role->value === 'mentor' ? 'blue' : 'gray') }}">
+                                        {{ $user->role->label() }}
+                                    </span>
+                                </td>
+                                <td>
+                                    @if($user->account_status === 'approved')
+                                        <span class="adm-badge adm-badge--green">Approved</span>
+                                    @elseif($user->account_status === 'pending')
+                                        <span class="adm-badge adm-badge--amber">Pending</span>
+                                    @else
+                                        <span class="adm-badge adm-badge--red">{{ ucfirst($user->account_status) }}</span>
+                                    @endif
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            @else
+                <div class="adm-empty">
+                    <p class="adm-empty__text">No recent users found.</p>
+                </div>
+            @endif
+        </div>
+    </div>
+
+    {{-- Recent Bookings Panel --}}
+    <div class="adm-card">
+        <div class="adm-card__header">
+            <div>
+                <h2 class="adm-card__title">Recent Bookings</h2>
+                <p class="adm-card__subtitle">Latest session requests</p>
+            </div>
+        </div>
+        <div class="adm-table-wrap">
+            @if($recentBookings->count() > 0)
+                <table class="adm-table">
+                    <thead>
+                        <tr>
+                            <th>Gig / Participants</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($recentBookings as $booking)
+                            <tr>
+                                <td>
+                                    <div class="adm-user-name">{{ Str::limit($booking->gig->title ?? 'Untitled Gig', 36) }}</div>
+                                    <div class="adm-user-email">{{ $booking->freelancer->first_name ?? 'User' }} → {{ $booking->mentor->first_name ?? 'Mentor' }}</div>
+                                </td>
+                                <td>
+                                    <span class="adm-badge adm-badge--{{ $booking->status->colorClass() === 'success' ? 'green' : ($booking->status->colorClass() === 'warning' ? 'amber' : ($booking->status->colorClass() === 'danger' ? 'red' : 'blue')) }}">
+                                        {{ $booking->status->label() }}
+                                    </span>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            @else
+                <div class="adm-empty">
+                    <p class="adm-empty__text">No recent bookings found.</p>
+                </div>
+            @endif
+        </div>
+    </div>
+</div>
+
+{{-- Quick Action Buttons in a separate card --}}
+<div class="adm-card">
+    <div class="adm-card__header">
+        <div>
+            <h2 class="adm-card__title">Quick Actions</h2>
+            <p class="adm-card__subtitle">Fast access to key management workflows</p>
+        </div>
+    </div>
+    <div class="adm-quick-actions">
+        <a href="{{ route('admin.approvals.index') }}" class="adm-quick-action adm-quick-action--green">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Approve Registrations
+            @if($stats['pending_approvals'] > 0)
+                <span class="adm-quick-action__badge">{{ $stats['pending_approvals'] }}</span>
+            @endif
+        </a>
+        <a href="{{ route('admin.users.mentors') }}" class="adm-quick-action adm-quick-action--blue">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="8" r="5" stroke="currentColor" stroke-width="2"/>
+                <path d="M3 21v-2a7 7 0 0114 0v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            View All Mentors
+        </a>
+        <a href="{{ route('admin.users.freelancers') }}" class="adm-quick-action adm-quick-action--purple">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <path d="M16 16v1a2 2 0 01-2 2H3a2 2 0 01-2-2V7a2 2 0 012-2h11a2 2 0 012 2v1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            View All Freelancers
+        </a>
+        <a href="{{ route('admin.users.mentors', ['max_rating' => 2, 'sort' => 'rating_asc']) }}" class="adm-quick-action adm-quick-action--red">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Low-Rated Mentors
+        </a>
+        <a href="{{ route('admin.users.freelancers', ['max_rating' => 2, 'sort' => 'rating_asc']) }}" class="adm-quick-action adm-quick-action--amber">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Low-Rated Freelancers
+        </a>
+        <a href="{{ route('admin.audit-log') }}" class="adm-quick-action adm-quick-action--indigo">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <rect x="3" y="4" width="18" height="16" rx="2" stroke="currentColor" stroke-width="2"/>
+                <path d="M7 8h10M7 12h10M7 16h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            Audit Log
+        </a>
+    </div>
+</div>
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const primaryColor = '#3b82f6';
+    const greenColor = '#10b981';
+    const purpleColor = '#8b5cf6';
+    const amberColor = '#f59e0b';
+    const redColor = '#ef4444';
+
+    // 1. User Growth Chart
+    const growthCtx = document.getElementById('userGrowthChart');
+    if (growthCtx) {
+        new Chart(growthCtx, {
+            type: 'line',
+            data: {
+                labels: {!! json_encode($charts['userGrowthDates'] ?? []) !!},
+                datasets: [{
+                    label: 'New Users',
+                    data: {!! json_encode($charts['userGrowthCounts'] ?? []) !!},
+                    borderColor: primaryColor,
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.3,
+                    pointRadius: 3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, ticks: { stepSize: 1 } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+    }
+
+    // 2. Booking Statistics Chart
+    const bookingCtx = document.getElementById('bookingStatsChart');
+    if (bookingCtx) {
+        const bookingData = {!! json_encode($charts['bookingStats'] ?? []) !!};
+        new Chart(bookingCtx, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(bookingData),
+                datasets: [{
+                    label: 'Bookings',
+                    data: Object.values(bookingData),
+                    backgroundColor: [amberColor, primaryColor, greenColor, redColor],
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, ticks: { stepSize: 1 } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+    }
+
+    // 3. Mentor vs Freelancer Distribution Chart
+    const distCtx = document.getElementById('userDistChart');
+    if (distCtx) {
+        const distData = {!! json_encode($charts['userDistribution'] ?? []) !!};
+        new Chart(distCtx, {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(distData),
+                datasets: [{
+                    data: Object.values(distData),
+                    backgroundColor: [greenColor, purpleColor],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '68%',
+                plugins: {
+                    legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 12 } } }
+                }
+            }
+        });
+    }
+});
+</script>
+@endpush

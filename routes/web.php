@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\AuditLogController;
 use App\Http\Controllers\Admin\RegistrationApprovalController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Auth\LoginController;
@@ -130,6 +131,9 @@ Route::middleware('auth')->group(function () {
 
         // Permanently remove account
         Route::delete('/admin/users/{user}', [UserManagementController::class, 'destroy'])->name('admin.users.destroy');
+
+        // Audit log
+        Route::get('/admin/audit-log', [AuditLogController::class, 'index'])->name('admin.audit-log');
     });
 
     /* ─── LMS: Freelancer ─── */

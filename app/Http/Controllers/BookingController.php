@@ -6,6 +6,7 @@ use App\Enums\BookingStatus;
 use App\Http\Requests\Booking\ReviewRequest;
 use App\Http\Requests\Booking\StoreBookingRequest;
 use App\Http\Requests\Booking\UpdateStatusRequest;
+use App\Models\AuditLog;
 use App\Models\Booking;
 use App\Models\Gig;
 use App\Models\Notification;
@@ -49,6 +50,15 @@ class BookingController extends Controller
 
         // Increment gig bookings count
         $gig->increment('total_bookings');
+
+        AuditLog::log(
+            'booking.created',
+            "{$freelancer->full_name} requested a booking for '{$gig->title}'",
+            'bookings',
+            $booking,
+            null,
+            ['status' => BookingStatus::REQUESTED->value, 'gig_id' => $gig->id, 'price_paid' => $booking->price_paid],
+        );
 
         // Notify mentor
         Notification::create([

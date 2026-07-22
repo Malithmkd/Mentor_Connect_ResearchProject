@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\RegisterRequest;
+use App\Models\AuditLog;
 use App\Models\MentorProfile;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
@@ -64,6 +65,15 @@ class RegisterController extends Controller
         }
 
         // Do NOT log in or send email verification — admin approval required first.
+        AuditLog::log(
+            'user.registered',
+            "{$user->full_name} registered as {$user->role->label()} (pending approval)",
+            'auth',
+            $user,
+            null,
+            ['email' => $user->email, 'role' => $user->role->value, 'account_status' => 'pending'],
+        );
+
         return redirect()->route('approval.pending')
             ->with('success', 'Your application has been submitted and is awaiting admin review.');
     }

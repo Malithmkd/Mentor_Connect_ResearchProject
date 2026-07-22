@@ -1,28 +1,24 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
 @section('title', 'Registration Approvals')
 
 @section('content')
-<section class="dashboard">
-    <div class="dashboard__inner">
+<div class="adm-page-header">
+    <div>
+        <h1 class="adm-page-title">
+            Registration Approvals
+            @if ($totalPending > 0)
+                <span class="approval-badge">{{ $totalPending }}</span>
+            @endif
+        </h1>
+        <p class="adm-page-subtitle">Review and approve or reject new account registrations.</p>
+    </div>
+    <div class="adm-page-header__actions">
+        <a href="{{ route('admin.dashboard') }}" class="adm-btn adm-btn--ghost adm-btn--sm">← Back to Dashboard</a>
+    </div>
+</div>
 
-        {{-- Header --}}
-        <header class="dashboard__header">
-            <div>
-                <h1 class="dashboard__title">
-                    Registration Approvals
-                    @if ($totalPending > 0)
-                        <span class="approval-badge">{{ $totalPending }}</span>
-                    @endif
-                </h1>
-                <p class="dashboard__subtitle">
-                    Review and approve or reject new account registrations.
-                </p>
-            </div>
-            <a href="{{ route('admin.dashboard') }}" class="btn btn--ghost btn--sm">
-                ← Back to Dashboard
-            </a>
-        </header>
+<div class="dashboard__inner">
 
         {{-- Flash --}}
         @if (session('success'))
@@ -251,10 +247,8 @@
                 </table>
             </div>
         </div>
-        @endif
-
     </div>
-</section>
+</div>
 
 {{-- Toggle reject form --}}
 <script>

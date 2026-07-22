@@ -1,23 +1,19 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
 @section('title', $title)
 
 @section('content')
-<section class="dashboard">
-    <div class="dashboard__inner">
+<div class="adm-page-header">
+    <div>
+        <h1 class="adm-page-title">{{ $title }}</h1>
+        <p class="adm-page-subtitle">Review, disable, or remove accounts based on community ratings.</p>
+    </div>
+    <div class="adm-page-header__actions">
+        <a href="{{ route('admin.dashboard') }}" class="adm-btn adm-btn--ghost adm-btn--sm">← Back to Dashboard</a>
+    </div>
+</div>
 
-        {{-- Header --}}
-        <header class="dashboard__header">
-            <div>
-                <h1 class="dashboard__title">{{ $title }}</h1>
-                <p class="dashboard__subtitle">
-                    Review, disable, or remove accounts based on community ratings.
-                </p>
-            </div>
-            <a href="{{ route('admin.dashboard') }}" class="btn btn--ghost btn--sm">
-                ← Back to Dashboard
-            </a>
-        </header>
+<div class="dashboard__inner">
 
         {{-- Flash messages --}}
         @if (session('success'))
@@ -234,10 +230,8 @@
                 </div>
                 @endif
             </div>
-        </div>
-
     </div>
-</section>
+</div>
 
 <style>
 /* ── Admin table ── */

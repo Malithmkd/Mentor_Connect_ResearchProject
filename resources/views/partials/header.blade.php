@@ -9,12 +9,14 @@
         </a>
 
         <nav class="site-header__nav" aria-label="Main navigation">
-            <a href="{{ route('home') }}" class="site-header__link {{ request()->routeIs('home') ? 'site-header__link--active' : '' }}">
-                Home
-            </a>
-            <a href="{{ route('gigs.index') }}" class="site-header__link {{ request()->routeIs('gigs.*') ? 'site-header__link--active' : '' }}">
-                Find Mentors
-            </a>
+            @if(!auth()->check() || !auth()->user()->isAdmin())
+                <a href="{{ route('home') }}" class="site-header__link {{ request()->routeIs('home') ? 'site-header__link--active' : '' }}">
+                    Home
+                </a>
+                <a href="{{ route('gigs.index') }}" class="site-header__link {{ request()->routeIs('gigs.*') ? 'site-header__link--active' : '' }}">
+                    Find Mentors
+                </a>
+            @endif
             @auth
                 @role('freelancer')
                     <a href="{{ route('freelancer.dashboard') }}" class="site-header__link {{ request()->routeIs('freelancer.dashboard') ? 'site-header__link--active' : '' }}">
@@ -49,7 +51,7 @@
                 @endrole
                 @role('admin')
                     <a href="{{ route('admin.dashboard') }}" class="site-header__link {{ request()->routeIs('admin.*') ? 'site-header__link--active' : '' }}">
-                        Admin
+                        Admin Dashboard
                     </a>
                 @endrole
             @endauth
@@ -136,8 +138,10 @@
     </div>
 
     <nav class="site-header__mobile-nav" id="mobileNav" aria-label="Mobile navigation">
-        <a href="{{ route('home') }}" class="site-header__mobile-link">Home</a>
-        <a href="{{ route('gigs.index') }}" class="site-header__mobile-link">Find Mentors</a>
+        @if(!auth()->check() || !auth()->user()->isAdmin())
+            <a href="{{ route('home') }}" class="site-header__mobile-link">Home</a>
+            <a href="{{ route('gigs.index') }}" class="site-header__mobile-link">Find Mentors</a>
+        @endif
         @auth
             <a href="{{ route('profile.show') }}" class="site-header__mobile-link">My Profile</a>
             <a href="{{ route('notifications.index') }}" class="site-header__mobile-link">Notifications</a>

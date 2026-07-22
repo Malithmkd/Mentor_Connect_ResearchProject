@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
+use App\Models\AuditLog;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -67,6 +68,15 @@ class RegistrationApprovalController extends Controller
             'rejection_reason' => null,
         ]);
 
+        AuditLog::log(
+            'user.approved',
+            "Approved registration for {$user->full_name} ({$user->role->label()})",
+            'approvals',
+            $user,
+            ['account_status' => 'pending'],
+            ['account_status' => 'approved'],
+        );
+
         return back()->with('success', "{$user->full_name} has been approved and can now log in.");
     }
 
@@ -86,6 +96,15 @@ class RegistrationApprovalController extends Controller
             'rejection_reason' => $request->input('rejection_reason'),
         ]);
 
+        AuditLog::log(
+            'user.rejected',
+            "Rejected registration for {$user->full_name} ({$user->role->label()})",
+            'approvals',
+            $user,
+            ['account_status' => 'pending'],
+            ['account_status' => 'rejected', 'rejection_reason' => $request->input('rejection_reason')],
+        );
+
         return back()->with('success', "{$user->full_name}'s registration has been rejected.");
     }
 
@@ -100,6 +119,15 @@ class RegistrationApprovalController extends Controller
             'account_status'   => 'pending',
             'rejection_reason' => null,
         ]);
+
+        AuditLog::log(
+            'user.reopen',
+            "Re-opened application for {$user->full_name} ({$user->role->label()})",
+            'approvals',
+            $user,
+            ['account_status' => 'rejected'],
+            ['account_status' => 'pending'],
+        );
 
         return back()->with('success', "{$user->full_name}'s application has been moved back to pending.");
     }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
+use App\Models\AuditLog;
 use App\Models\Review;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
@@ -165,9 +166,19 @@ class UserManagementController extends Controller
     {
         $this->authorizeManagedUser($user);
 
+        $oldStatus = $user->is_active;
         $user->update(['is_active' => ! $user->is_active]);
 
         $action = $user->is_active ? 'enabled' : 'disabled';
+
+        AuditLog::log(
+            'user.status_toggled',
+            "Account {$action} for {$user->full_name} ({$user->role->label()})",
+            'users',
+            $user,
+            ['is_active' => $oldStatus],
+            ['is_active' => $user->is_active],
+        );
 
         return back()->with('success', "{$user->full_name}'s account has been {$action}.");
     }
@@ -182,6 +193,15 @@ class UserManagementController extends Controller
 
         $role = $user->role->value;
         $name = $user->full_name;
+        $userId = $user->id;
+
+        AuditLog::log(
+            'user.deleted',
+            "Permanently deleted {$role} account: {$name} (ID #{$userId})",
+            'users',
+            null,
+            ['id' => $userId, 'name' => $name, 'role' => $role],
+        );
 
         // Hard-delete (bypass SoftDeletes for full removal)
         $user->forceDelete();

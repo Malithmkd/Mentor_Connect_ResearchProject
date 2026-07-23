@@ -80,7 +80,7 @@
     </a>
 
     {{-- Total Gigs --}}
-    <div class="adm-stat-card">
+    <a href="{{ route('admin.gigs.index') }}" class="adm-stat-card">
         <div class="adm-stat-card__icon adm-stat-card__icon--indigo">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
                 <path d="M4 6a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6z" stroke="currentColor" stroke-width="2"/>
@@ -91,7 +91,8 @@
             <div class="adm-stat-card__value">{{ $stats['gigs'] }}</div>
             <div class="adm-stat-card__label">Total Gigs</div>
         </div>
-    </div>
+        <span class="adm-stat-card__arrow">→</span>
+    </a>
 
     {{-- Total Bookings --}}
     <div class="adm-stat-card">

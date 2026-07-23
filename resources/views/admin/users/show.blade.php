@@ -1,23 +1,27 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
 @section('title', 'User Profile — ' . $user->full_name)
 
 @section('content')
-<section class="dashboard">
-    <div class="dashboard__inner">
+<div class="adm-page-header">
+    <div>
+        <h1 class="adm-page-title">{{ $user->full_name }}</h1>
+        <p class="adm-page-subtitle">{{ $user->isMentor() ? 'Mentor' : 'Freelancer' }} account details and management</p>
+    </div>
+    <div class="adm-page-header__actions">
+        <a href="{{ $user->isMentor() ? route('admin.users.mentors') : route('admin.users.freelancers') }}"
+           class="adm-btn adm-btn--ghost adm-btn--sm">
+            ← Back to {{ $user->isMentor() ? 'Mentors' : 'Freelancers' }}
+        </a>
+    </div>
+</div>
 
-        {{-- Back link --}}
-        <div style="margin-bottom:var(--space-4);">
-            <a href="{{ $user->isMentor() ? route('admin.users.mentors') : route('admin.users.freelancers') }}"
-               class="btn btn--ghost btn--sm">
-                ← Back to {{ $user->isMentor() ? 'Mentors' : 'Freelancers' }}
-            </a>
-        </div>
+<div>
 
         {{-- Flash --}}
         @if (session('success'))
-            <div class="alert alert--success" style="margin-bottom:var(--space-4);">
-                <svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M5 10l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <div class="adm-alert adm-alert--success">
+                <svg width="16" height="16" viewBox="0 0 20 20" fill="none" style="flex-shrink:0"><path d="M5 10l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 {{ session('success') }}
             </div>
         @endif
@@ -29,16 +33,16 @@
                 <div class="ushow-hero__meta">
                     <h1 class="ushow-hero__name">{{ $user->full_name }}</h1>
                     <p class="ushow-hero__email">{{ $user->email }}</p>
-                    <div style="display:flex;align-items:center;gap:var(--space-3);flex-wrap:wrap;margin-top:var(--space-2);">
-                        <span class="badge badge--{{ $user->isMentor() ? 'info' : 'purple' }}">
+                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px;">
+                        <span class="adm-badge {{ $user->isMentor() ? 'adm-badge--blue' : 'adm-badge--purple' }}">
                             {{ $user->role->label() }}
                         </span>
-                        <span class="badge badge--{{ $user->is_active ? 'success' : 'danger' }}">
+                        <span class="adm-badge {{ $user->is_active ? 'adm-badge--green' : 'adm-badge--red' }}">
                             {{ $user->is_active ? 'Active' : 'Disabled' }}
                         </span>
                         @if ($user->isMentor())
                             @php $vs = $user->mentorProfile?->verification_status ?? 'none'; @endphp
-                            <span class="badge badge--{{ $vs === 'verified' ? 'success' : ($vs === 'pending' ? 'amber' : 'neutral') }}">
+                            <span class="adm-badge {{ $vs === 'verified' ? 'adm-badge--green' : ($vs === 'pending' ? 'adm-badge--amber' : 'adm-badge--gray') }}">
                                 {{ ucfirst($vs) }}
                             </span>
                         @endif
@@ -57,7 +61,7 @@
                       onsubmit="return confirm('{{ $user->is_active ? 'Disable' : 'Re-enable' }} {{ addslashes($user->full_name) }}?')">
                     @csrf @method('PATCH')
                     <button type="submit"
-                            class="btn btn--lg {{ $user->is_active ? 'btn--amber' : 'btn--success' }}">
+                            class="adm-btn {{ $user->is_active ? 'adm-btn--amber-action' : 'adm-btn--success' }}">
                         {{ $user->is_active ? '⏸ Disable Account' : '▶ Enable Account' }}
                     </button>
                 </form>
@@ -67,7 +71,7 @@
                       action="{{ route('admin.users.destroy', $user) }}"
                       onsubmit="return confirm('PERMANENTLY DELETE {{ strtoupper(addslashes($user->full_name)) }}? All their data will be erased. This cannot be undone.')">
                     @csrf @method('DELETE')
-                    <button type="submit" class="btn btn--lg btn--danger">
+                    <button type="submit" class="adm-btn adm-btn--danger">
                         🗑 Remove Account
                     </button>
                 </form>
@@ -138,12 +142,12 @@
         </div>
         @endif
 
-        <div class="dashboard__grid" style="margin-top:var(--space-5);">
+        <div class="adm-grid-3" style="margin-top:20px;">
 
             {{-- Rating breakdown --}}
-            <div class="panel">
-                <div class="panel__header"><h2 class="panel__title">Rating Breakdown</h2></div>
-                <div class="panel__body">
+            <div class="adm-card">
+                <div class="adm-card__header"><div class="adm-card__title">Rating Breakdown</div></div>
+                <div class="adm-card__body">
                     @if ($totalReviews > 0)
                         @foreach ($ratingBreakdown as $stars => $count)
                         @php $pct = $totalReviews > 0 ? round($count / $totalReviews * 100) : 0; @endphp
@@ -157,16 +161,16 @@
                         </div>
                         @endforeach
                     @else
-                        <div class="empty"><p class="empty__text">No reviews yet.</p></div>
+                        <div class="adm-empty"><p class="adm-empty__text">No reviews yet.</p></div>
                     @endif
                 </div>
             </div>
 
             {{-- Mentor profile details (mentor only) --}}
             @if ($user->isMentor() && $user->mentorProfile)
-            <div class="panel">
-                <div class="panel__header"><h2 class="panel__title">Mentor Profile</h2></div>
-                <div class="panel__body">
+            <div class="adm-card">
+                <div class="adm-card__header"><div class="adm-card__title">Mentor Profile</div></div>
+                <div class="adm-card__body">
                     @php $mp = $user->mentorProfile; @endphp
                     <dl class="detail-list">
                         @if ($mp->headline)
@@ -207,9 +211,9 @@
             @endif
 
             {{-- Contact info --}}
-            <div class="panel">
-                <div class="panel__header"><h2 class="panel__title">Contact & Location</h2></div>
-                <div class="panel__body">
+            <div class="adm-card">
+                <div class="adm-card__header"><div class="adm-card__title">Contact & Location</div></div>
+                <div class="adm-card__body">
                     <dl class="detail-list">
                         <div class="detail-list__row">
                             <dt>Email</dt>
@@ -238,11 +242,11 @@
         </div>
 
         {{-- Reviews list --}}
-        <div class="panel" style="margin-top:var(--space-5);">
-            <div class="panel__header">
-                <h2 class="panel__title">All Received Reviews ({{ $totalReviews }})</h2>
+        <div class="adm-card" style="margin-top:20px;">
+            <div class="adm-card__header">
+                <div class="adm-card__title">All Received Reviews ({{ $totalReviews }})</div>
             </div>
-            <div class="panel__body">
+            <div class="adm-card__body">
                 @if ($reviews->count())
                     <div class="review-list">
                         @foreach ($reviews as $review)
@@ -289,13 +293,12 @@
                         @endforeach
                     </div>
                 @else
-                    <div class="empty"><p class="empty__text">No reviews received yet.</p></div>
+                    <div class="adm-empty"><p class="adm-empty__text">No reviews received yet.</p></div>
                 @endif
             </div>
         </div>
 
-    </div>
-</section>
+</div>
 
 <style>
 /* ── Hero ── */
@@ -303,96 +306,91 @@
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    gap: var(--space-6);
+    gap: 24px;
     flex-wrap: wrap;
-    background: var(--bg-card, var(--bg-elevated));
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: var(--space-6);
-    margin-bottom: var(--space-5);
+    background: var(--adm-surface);
+    border: 1px solid var(--adm-border);
+    border-radius: var(--adm-radius-lg);
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: var(--adm-shadow-sm);
 }
-.ushow-hero__left  { display: flex; align-items: flex-start; gap: var(--space-4); flex: 1; }
-.ushow-hero__avatar { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; flex-shrink: 0; border: 3px solid var(--border); }
-.ushow-hero__name  { font-size: 1.4rem; font-weight: 700; margin: 0; }
-.ushow-hero__email { font-size: 0.85rem; color: var(--text-muted); margin: 2px 0 0; }
-.ushow-hero__bio   { font-size: 0.875rem; color: var(--text-secondary); margin-top: var(--space-2); max-width: 500px; }
-.ushow-hero__actions { display: flex; gap: var(--space-3); align-items: center; flex-wrap: wrap; }
+.ushow-hero__left  { display: flex; align-items: flex-start; gap: 16px; flex: 1; }
+.ushow-hero__avatar { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; flex-shrink: 0; border: 3px solid var(--adm-border); }
+.ushow-hero__name  { font-size: 20px; font-weight: 700; margin: 0; color: var(--adm-text-900); }
+.ushow-hero__email { font-size: 13px; color: var(--adm-text-400); margin: 2px 0 0; }
+.ushow-hero__bio   { font-size: 13px; color: var(--adm-text-500); margin-top: 8px; max-width: 500px; line-height: 1.6; }
+.ushow-hero__actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 
 /* ── Stat row ── */
 .ushow-stats {
     display: flex;
-    gap: var(--space-4);
+    gap: 14px;
     flex-wrap: wrap;
-    margin-bottom: var(--space-5);
+    margin-bottom: 20px;
 }
 .ushow-stat {
     flex: 1;
     min-width: 120px;
-    background: var(--bg-card, var(--bg-elevated));
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: var(--space-4);
+    background: var(--adm-surface);
+    border: 1px solid var(--adm-border);
+    border-radius: var(--adm-radius);
+    padding: 16px;
     text-align: center;
+    box-shadow: var(--adm-shadow-sm);
 }
-.ushow-stat__value { display: block; font-size: 1.6rem; font-weight: 700; }
+.ushow-stat__value { display: block; font-size: 26px; font-weight: 800; color: var(--adm-text-900); }
 .ushow-stat__value--danger { color: #ef4444; }
-.ushow-stat__label { display: block; font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
+.ushow-stat__label { display: block; font-size: 11px; color: var(--adm-text-400); margin-top: 4px; font-weight: 500; text-transform: uppercase; letter-spacing: .04em; }
 
 /* ── Warning banner ── */
 .ushow-warning {
     display: flex;
     align-items: flex-start;
-    gap: var(--space-3);
+    gap: 12px;
     background: rgba(239,68,68,.08);
     border: 1px solid rgba(239,68,68,.3);
     border-left: 4px solid #ef4444;
     color: #b91c1c;
-    border-radius: 8px;
-    padding: var(--space-4);
-    margin-bottom: var(--space-5);
+    border-radius: var(--adm-radius);
+    padding: 16px;
+    margin-bottom: 20px;
 }
 .ushow-warning svg { flex-shrink: 0; margin-top: 2px; }
-.ushow-warning p { font-size: 0.875rem; margin: 4px 0 0; }
+.ushow-warning p { font-size: 13px; margin: 4px 0 0; }
 
 /* ── Rating bar ── */
-.rating-bar { display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-2); }
-.rating-bar__label { width: 24px; font-size: 0.8rem; color: var(--text-muted); flex-shrink: 0; }
-.rating-bar__track { flex: 1; height: 8px; background: var(--border); border-radius: 99px; overflow: hidden; }
+.rating-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.rating-bar__label { width: 24px; font-size: 12px; color: var(--adm-text-400); flex-shrink: 0; }
+.rating-bar__track { flex: 1; height: 8px; background: var(--adm-border); border-radius: 99px; overflow: hidden; }
 .rating-bar__fill  { height: 100%; border-radius: 99px; transition: width .3s ease; }
 .rating-bar__fill--green  { background: #10b981; }
 .rating-bar__fill--amber  { background: #f59e0b; }
 .rating-bar__fill--danger { background: #ef4444; }
-.rating-bar__count { width: 24px; font-size: 0.8rem; text-align: right; flex-shrink: 0; }
+.rating-bar__count { width: 24px; font-size: 12px; text-align: right; flex-shrink: 0; color: var(--adm-text-500); font-weight: 600; }
 
 /* ── Detail list ── */
-.detail-list { display: flex; flex-direction: column; gap: var(--space-2); }
-.detail-list__row { display: flex; gap: var(--space-3); font-size: 0.875rem; }
-.detail-list__row dt { width: 120px; flex-shrink: 0; color: var(--text-muted); font-weight: 500; }
-.detail-list__row dd { margin: 0; }
+.detail-list { display: flex; flex-direction: column; gap: 8px; }
+.detail-list__row { display: flex; gap: 12px; font-size: 13px; }
+.detail-list__row dt { width: 120px; flex-shrink: 0; color: var(--adm-text-400); font-weight: 500; }
+.detail-list__row dd { margin: 0; color: var(--adm-text-700); }
 
 /* ── Review list ── */
-.review-list  { display: flex; flex-direction: column; gap: var(--space-3); }
-.review-card  { border: 1px solid var(--border); border-radius: 8px; padding: var(--space-4); }
+.review-list  { display: flex; flex-direction: column; gap: 12px; }
+.review-card  { border: 1px solid var(--adm-border); border-radius: var(--adm-radius-sm); padding: 14px; }
 .review-card--danger { border-color: rgba(239,68,68,.35); background: rgba(239,68,68,.04); }
-.review-card__header { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-3); flex-wrap: wrap; }
-.review-card__comment { font-size: 0.875rem; color: var(--text-secondary); margin-top: var(--space-3); line-height: 1.6; }
+.review-card__header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+.review-card__comment { font-size: 13px; color: var(--adm-text-500); margin-top: 10px; line-height: 1.6; }
 
 /* ── Stars ── */
 .star-row  { display: flex; align-items: center; gap: 2px; }
 .star--filled path { fill: #f59e0b; stroke: #f59e0b; }
-.star--empty  path { fill: none;    stroke: var(--text-muted); }
+.star--empty  path { fill: none; stroke: var(--adm-text-400); }
 
-/* ── Buttons ── */
-.btn--lg  { padding: 10px 20px; font-size: 0.9rem; }
-.btn--amber  { background: #f59e0b; color: #fff; border-color: #f59e0b; }
-.btn--amber:hover { background: #d97706; border-color: #d97706; }
-.btn--success { background: #10b981; color: #fff; border-color: #10b981; }
-.btn--success:hover { background: #059669; border-color: #059669; }
-.btn--danger  { background: #ef4444; color: #fff; border-color: #ef4444; }
-.btn--danger:hover { background: #dc2626; border-color: #dc2626; }
-
-/* ── Alert ── */
-.alert { display:flex; align-items:center; gap:var(--space-2); padding:var(--space-3) var(--space-4); border-radius: 8px; font-size:0.9rem; }
-.alert--success { background: rgba(16,185,129,.12); color:#059669; }
+/* ── Extra buttons ── */
+.adm-btn--amber-action { background: #f59e0b; color: #fff; }
+.adm-btn--amber-action:hover { background: #d97706; }
+.adm-btn--success { background: #10b981; color: #fff; }
+.adm-btn--success:hover { background: #059669; }
 </style>
 @endsection

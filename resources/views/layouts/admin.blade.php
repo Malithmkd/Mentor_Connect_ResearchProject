@@ -89,8 +89,8 @@
         {{-- Gig Management --}}
         <span class="adm-sidebar__section-label">Platform</span>
 
-        <a href="{{ route('admin.users.mentors') }}"
-           class="adm-sidebar__link">
+        <a href="{{ route('admin.gigs.index') }}"
+           class="adm-sidebar__link {{ request()->routeIs('admin.gigs.*') ? 'is-active' : '' }}">
             <svg class="adm-sidebar__icon" viewBox="0 0 20 20" fill="none">
                 <rect x="2" y="4" width="16" height="12" rx="2" stroke="currentColor" stroke-width="1.5"/>
                 <path d="M6 8h8M6 12h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
@@ -98,8 +98,8 @@
             Gig Management
         </a>
 
-        <a href="{{ route('admin.users.mentors') }}"
-           class="adm-sidebar__link">
+        <a href="{{ route('admin.dashboard') }}"
+           class="adm-sidebar__link {{ false ? 'is-active' : '' }}">
             <svg class="adm-sidebar__icon" viewBox="0 0 20 20" fill="none">
                 <path d="M3 6h14M5 10h10M8 14h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
             </svg>

@@ -1,8 +1,196 @@
-@extends('layouts.app')
+@php $isAdmin = auth()->user()?->isAdmin(); @endphp
+
+@extends($isAdmin ? 'layouts.admin' : 'layouts.app')
 
 @section('title', 'Edit Profile')
 
 @section('content')
+
+@if ($isAdmin)
+{{-- ── Admin-styled Edit Profile Page ── --}}
+<div class="adm-page-header">
+    <div>
+        <h1 class="adm-page-title">Edit Profile</h1>
+        <p class="adm-page-subtitle">Update your personal account information and password.</p>
+    </div>
+    <div class="adm-page-header__actions">
+        <a href="{{ route('profile.show') }}" class="adm-btn adm-btn--ghost adm-btn--sm">← View Profile</a>
+    </div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:20px;max-width:800px;">
+
+    {{-- Profile Picture --}}
+    <div class="adm-card">
+        <div class="adm-card__header">
+            <h2 class="adm-card__title">Profile Picture</h2>
+        </div>
+        <div class="adm-card__body">
+            @if (session('avatar_success'))
+                <div class="adm-alert adm-alert--success" style="margin-bottom:16px;">
+                    <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M5 10l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    {{ session('avatar_success') }}
+                </div>
+            @endif
+            @error('avatar')
+                <div class="adm-alert adm-alert--error" style="margin-bottom:16px;">{{ $message }}</div>
+            @enderror
+
+            <form method="POST" action="{{ route('profile.avatar') }}" enctype="multipart/form-data" id="admin-avatar-form">
+                @csrf
+                <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+                    <div style="position:relative;flex-shrink:0">
+                        <img id="admin-avatar-preview"
+                             src="{{ $user->avatar_url }}"
+                             alt="{{ $user->full_name }}"
+                             style="width:84px;height:84px;border-radius:50%;object-fit:cover;border:3px solid var(--adm-primary,#3b82f6);display:block">
+                        <label for="admin-avatar-input"
+                               title="Change picture"
+                               style="position:absolute;bottom:0;right:0;width:26px;height:26px;border-radius:50%;background:var(--adm-primary,#3b82f6);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.25)">
+                            <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
+                                <path d="M11.5 2.5a2.12 2.12 0 013 3L5 15H1v-4L11.5 2.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+                            </svg>
+                        </label>
+                    </div>
+
+                    <div style="flex:1;min-width:200px">
+                        <p style="font-weight:600;margin:0 0 4px;font-size:14px;color:var(--adm-text-900);">{{ $user->full_name }}</p>
+                        <p style="font-size:12px;color:var(--adm-text-400);margin:0 0 12px">
+                            JPG, PNG, GIF or WebP &middot; max 2 MB
+                        </p>
+                        <input type="file" id="admin-avatar-input" name="avatar"
+                               accept="image/jpeg,image/png,image/gif,image/webp"
+                               style="display:none"
+                               onchange="previewAdminAvatar(this)">
+                        <div style="display:flex;gap:8px;flex-wrap:wrap">
+                            <label for="admin-avatar-input" class="adm-btn adm-btn--ghost adm-btn--sm" style="cursor:pointer">Choose Photo</label>
+                            <button type="submit" id="admin-avatar-submit" class="adm-btn adm-btn--primary adm-btn--sm" style="display:none">Upload</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {{-- Personal Information --}}
+    <div class="adm-card">
+        <div class="adm-card__header">
+            <h2 class="adm-card__title">Personal Information</h2>
+        </div>
+        <div class="adm-card__body">
+            <form method="POST" action="{{ route('profile.update') }}">
+                @csrf
+                @method('PATCH')
+
+                <div class="adm-form-row" style="margin-bottom:14px;">
+                    <div class="adm-form-field adm-form-field--grow">
+                        <label for="first_name" class="adm-form-label">First Name</label>
+                        <input type="text" id="first_name" name="first_name" class="adm-form-input" value="{{ old('first_name', $user->first_name) }}" required>
+                    </div>
+                    <div class="adm-form-field adm-form-field--grow">
+                        <label for="last_name" class="adm-form-label">Last Name</label>
+                        <input type="text" id="last_name" name="last_name" class="adm-form-input" value="{{ old('last_name', $user->last_name) }}" required>
+                    </div>
+                </div>
+
+                <div class="adm-form-field" style="margin-bottom:14px;">
+                    <label for="email" class="adm-form-label">Email Address</label>
+                    <input type="email" id="email" name="email" class="adm-form-input" value="{{ old('email', $user->email) }}" required>
+                </div>
+
+                <div class="adm-form-field" style="margin-bottom:14px;">
+                    <label for="bio" class="adm-form-label">Bio</label>
+                    <textarea id="bio" name="bio" class="adm-form-input" rows="3" style="resize:vertical;">{{ old('bio', $user->bio) }}</textarea>
+                </div>
+
+                <div class="adm-form-row" style="margin-bottom:20px;">
+                    <div class="adm-form-field adm-form-field--grow">
+                        <label for="location" class="adm-form-label">Location</label>
+                        <input type="text" id="location" name="location" class="adm-form-input" value="{{ old('location', $user->location) }}" placeholder="City, Country">
+                    </div>
+                    <div class="adm-form-field adm-form-field--grow">
+                        <label for="timezone" class="adm-form-label">Timezone</label>
+                        <input type="text" id="timezone" name="timezone" class="adm-form-input" value="{{ old('timezone', $user->timezone) }}" placeholder="UTC">
+                    </div>
+                </div>
+
+                <div style="display:flex;gap:8px;">
+                    <button type="submit" class="adm-btn adm-btn--primary">Save Changes</button>
+                    <a href="{{ route('profile.show') }}" class="adm-btn adm-btn--ghost">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {{-- Change Password --}}
+    <div class="adm-card">
+        <div class="adm-card__header">
+            <h2 class="adm-card__title">Change Password</h2>
+        </div>
+        <div class="adm-card__body">
+            @if (session('password_success'))
+                <div class="adm-alert adm-alert--success" style="margin-bottom:16px;">
+                    {{ session('password_success') }}
+                </div>
+            @endif
+            @if (session('password_error'))
+                <div class="adm-alert adm-alert--error" style="margin-bottom:16px;">
+                    {{ session('password_error') }}
+                </div>
+            @endif
+
+            <form method="POST" action="{{ route('profile.password') }}">
+                @csrf
+                @method('PATCH')
+
+                <div class="adm-form-field" style="margin-bottom:14px;">
+                    <label for="current_password" class="adm-form-label">Current Password</label>
+                    <input type="password" id="current_password" name="current_password"
+                           class="adm-form-input"
+                           autocomplete="current-password" required>
+                    @error('current_password', 'password')
+                        <p style="font-size:12px;color:#ef4444;margin-top:4px;">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div class="adm-form-field" style="margin-bottom:14px;">
+                    <label for="password" class="adm-form-label">New Password</label>
+                    <input type="password" id="password" name="password"
+                           class="adm-form-input"
+                           autocomplete="new-password" required>
+                    @error('password', 'password')
+                        <p style="font-size:12px;color:#ef4444;margin-top:4px;">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div class="adm-form-field" style="margin-bottom:20px;">
+                    <label for="password_confirmation" class="adm-form-label">Confirm New Password</label>
+                    <input type="password" id="password_confirmation" name="password_confirmation"
+                           class="adm-form-input" autocomplete="new-password" required>
+                </div>
+
+                <button type="submit" class="adm-btn adm-btn--primary">Update Password</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+@push('scripts')
+<script>
+function previewAdminAvatar(input) {
+    if (!input.files || !input.files[0]) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        document.getElementById('admin-avatar-preview').src = e.target.result;
+        document.getElementById('admin-avatar-submit').style.display = 'inline-flex';
+    };
+    reader.readAsDataURL(input.files[0]);
+}
+</script>
+@endpush
+
+@else
+{{-- ── Standard User Edit Profile Page ── --}}
 <section class="dashboard">
     <div class="dashboard__inner">
         <header class="dashboard__header">
@@ -212,4 +400,5 @@ function previewAvatar(input) {
 }
 </script>
 @endpush
+@endif
 @endsection

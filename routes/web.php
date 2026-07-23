@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\AuditLogController;
+use App\Http\Controllers\Admin\GigManagementController;
 use App\Http\Controllers\Admin\RegistrationApprovalController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Auth\LoginController;
@@ -134,6 +135,9 @@ Route::middleware('auth')->group(function () {
 
         // Audit log
         Route::get('/admin/audit-log', [AuditLogController::class, 'index'])->name('admin.audit-log');
+
+        // Gig management
+        Route::get('/admin/gigs', [GigManagementController::class, 'index'])->name('admin.gigs.index');
     });
 
     /* ─── LMS: Freelancer ─── */

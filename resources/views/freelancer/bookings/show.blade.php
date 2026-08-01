@@ -24,63 +24,99 @@
         @include('partials.flash')
 
         <div class="dashboard__grid">
-            <div class="panel">
-                <div class="panel__header">
-                    <h2 class="panel__title">Session Details</h2>
+            {{-- Stylish Executive Session Details Card --}}
+            <div class="session-card">
+                <div class="session-hero">
+                    <div class="session-hero__user">
+                        @if($booking->mentor->avatar_url)
+                            <img src="{{ $booking->mentor->avatar_url }}" alt="{{ $booking->mentor->full_name }}" class="session-hero__avatar">
+                        @else
+                            <div class="session-hero__avatar">
+                                {{ strtoupper(substr($booking->mentor->first_name, 0, 1) . substr($booking->mentor->last_name, 0, 1)) }}
+                            </div>
+                        @endif
+                        <div>
+                            <h3 class="session-hero__name">{{ $booking->mentor->full_name }}</h3>
+                            <div class="session-hero__role">
+                                <span>🎓 Mentor</span>
+                                &middot;
+                                <a href="{{ route('users.profile', $booking->mentor) }}" style="color: #ffffff; text-decoration: underline; font-weight: 600;">View Profile →</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="session-hero__status">
+                        <span style="width:8px; height:8px; border-radius:50%; background:#818cf8; display:inline-block"></span>
+                        {{ $booking->status->label() }}
+                    </div>
                 </div>
-                <div class="panel__body">
-                    <dl class="detail-list">
-                        <div class="detail-list__row">
-                            <dt>Gig</dt>
-                            <dd><a href="{{ route('gigs.show', $booking->gig->slug) }}">{{ $booking->gig->title }}</a></dd>
+
+                {{-- Metric Pills Row --}}
+                <div class="session-metrics">
+                    <div class="session-metric-pill">
+                        <span class="session-metric-pill__label">⏱️ Duration</span>
+                        <span class="session-metric-pill__value">{{ $booking->gig->duration_minutes }} Mins</span>
+                    </div>
+                    <div class="session-metric-pill">
+                        <span class="session-metric-pill__label">💰 Total Fee</span>
+                        <span class="session-metric-pill__value">{{ $booking->formatted_price }}</span>
+                    </div>
+                    <div class="session-metric-pill">
+                        <span class="session-metric-pill__label">📅 Date</span>
+                        <span class="session-metric-pill__value">
+                            {{ $booking->scheduled_at ? $booking->scheduled_at->format('M d, Y') : ($booking->proposed_date ? $booking->proposed_date->format('M d, Y') : 'Pending') }}
+                        </span>
+                    </div>
+                </div>
+
+                {{-- Details Info Grid --}}
+                <div class="session-info-grid">
+                    <div class="session-info-item">
+                        <span class="session-info-item__label">Mentorship Session</span>
+                        <span class="session-info-item__value">
+                            <a href="{{ route('gigs.show', $booking->gig->slug) }}" style="color:var(--color-primary); font-weight:700;">
+                                {{ $booking->gig->title }} →
+                            </a>
+                        </span>
+                    </div>
+
+                    @if ($booking->scheduled_at)
+                        <div class="session-info-item">
+                            <span class="session-info-item__label">Confirmed Schedule</span>
+                            <span class="session-info-item__value">
+                                🕒 {{ $booking->scheduled_at->format('D, M d Y \a\t g:i A') }}
+                            </span>
                         </div>
-                        <div class="detail-list__row">
-                            <dt>Mentor</dt>
-                            <dd style="display:flex; align-items:center; gap:var(--space-3)">
-                                {{ $booking->mentor->full_name }}
-                                <a href="{{ route('users.profile', $booking->mentor) }}"
-                                   class="btn btn--ghost btn--xs" style="padding:2px 8px; font-size:var(--text-xs)">
-                                    View Profile
-                                </a>
-                            </dd>
+                    @elseif ($booking->proposed_date)
+                        <div class="session-info-item">
+                            <span class="session-info-item__label">Proposed Date</span>
+                            <span class="session-info-item__value">
+                                📅 {{ $booking->proposed_date->format('D, M d Y') }}
+                            </span>
                         </div>
-                        <div class="detail-list__row">
-                            <dt>Duration</dt>
-                            <dd>{{ $booking->gig->duration_minutes }} minutes</dd>
-                        </div>
-                        <div class="detail-list__row">
-                            <dt>Price</dt>
-                            <dd>{{ $booking->formatted_price }}</dd>
-                        </div>
-                        <div class="detail-list__row">
-                            <dt>Status</dt>
-                            <dd><span class="badge badge--{{ $booking->status->colorClass() }}">{{ $booking->status->label() }}</span></dd>
-                        </div>
-                        @if ($booking->freelancer_note)
-                            <div class="detail-list__row">
-                                <dt>Your Note</dt>
-                                <dd>{{ $booking->freelancer_note }}</dd>
+                    @endif
+
+                    @if ($booking->meeting_link)
+                        <div class="session-meeting-box">
+                            <div class="session-meeting-box__info">
+                                <div class="session-meeting-box__icon">🎥</div>
+                                <div>
+                                    <h4 class="session-meeting-box__title">Online Video Call Ready</h4>
+                                    <span class="session-meeting-box__sub">Your mentor has shared the meeting link</span>
+                                </div>
                             </div>
-                        @endif
-                        @if ($booking->proposed_date)
-                            <div class="detail-list__row">
-                                <dt>Proposed Date</dt>
-                                <dd>{{ $booking->proposed_date->format('D, M d Y') }}</dd>
-                            </div>
-                        @endif
-                        @if ($booking->meeting_link)
-                            <div class="detail-list__row">
-                                <dt>Meeting Link</dt>
-                                <dd><a href="{{ $booking->meeting_link }}" target="_blank" rel="noopener">Join Session &rarr;</a></dd>
-                            </div>
-                        @endif
-                        @if ($booking->scheduled_at)
-                            <div class="detail-list__row">
-                                <dt>Scheduled</dt>
-                                <dd>{{ $booking->scheduled_at->format('D, M d Y \a\t g:i A') }}</dd>
-                            </div>
-                        @endif
-                    </dl>
+                            <a href="{{ $booking->meeting_link }}" target="_blank" rel="noopener" class="btn btn--primary" style="background:#10b981; border:none; border-radius:10px; font-weight:700; gap:0.5rem; display:inline-flex; align-items:center;">
+                                <span>Join Video Session</span>
+                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            </a>
+                        </div>
+                    @endif
+
+                    @if ($booking->freelancer_note)
+                        <div class="session-note-box">
+                            <div class="session-note-box__label">Your Note / Learning Goals</div>
+                            <p class="session-note-box__text">"{{ $booking->freelancer_note }}"</p>
+                        </div>
+                    @endif
                 </div>
             </div>
 
@@ -102,30 +138,42 @@
 
                 {{-- Leave review --}}
                 @if ($booking->canBeReviewedBy(auth()->user()))
-                    <div class="panel" style="margin-top:1.5rem">
-                        <div class="panel__header"><h2 class="panel__title">Leave a Review for Mentor</h2></div>
-                        <div class="panel__body">
+                    <div class="review-panel">
+                        <div class="review-panel__header">
+                            <h2 class="review-panel__title">
+                                <span>⭐</span> Leave a Review for Mentor
+                            </h2>
+                        </div>
+                        <div class="review-panel__body">
                             <form method="POST" action="{{ route('bookings.review', $booking) }}">
                                 @csrf
                                 <input type="hidden" name="booking_id" value="{{ $booking->id }}">
-                                <div class="form-group">
-                                    <label class="form-label" for="rating">Rating</label>
-                                    <select name="rating" id="rating" class="form-select" required>
-                                        <option value="">Select rating</option>
-                                        @for ($i = 5; $i >= 1; $i--)
-                                            <option value="{{ $i }}">{{ $i }} Star{{ $i > 1 ? 's' : '' }}</option>
-                                        @endfor
-                                    </select>
+                                
+                                <div style="margin-bottom: 1.25rem;">
+                                    <label class="review-comment-box__label">Overall Rating</label>
+                                    @include('partials._star_rating', ['inputName' => 'rating', 'currentRating' => 0])
                                 </div>
-                                <div class="form-group">
-                                    <label class="form-label" for="comment">Comment (optional)</label>
-                                    <textarea name="comment" id="comment" class="form-textarea" rows="4"
-                                              placeholder="Share your experience with the mentor...">{{ old('comment') }}</textarea>
+
+                                <div class="review-comment-box">
+                                    <div class="review-comment-box__header">
+                                        <label class="review-comment-box__label" for="comment">
+                                            <span>💬</span> Your Feedback & Comments <span style="font-weight:400;color:var(--color-gray-400)">(optional)</span>
+                                        </label>
+                                    </div>
+                                    <textarea name="comment" id="comment" class="review-comment-box__textarea" rows="4"
+                                              placeholder="Share details about your mentorship session, feedback, and key takeaways...">{{ old('comment') }}</textarea>
                                 </div>
-                                <label class="form-check" style="margin-bottom:1rem">
-                                    <input type="checkbox" name="is_public" value="1" checked> Make review public
+
+                                <label class="review-toggle-label">
+                                    <input type="checkbox" name="is_public" value="1" class="review-toggle-input" checked>
+                                    <span class="review-toggle-switch"></span>
+                                    <span>Make review public on mentor's profile</span>
                                 </label>
-                                <button type="submit" class="btn btn--primary btn--sm" style="width:100%">Submit Review</button>
+
+                                <button type="submit" class="btn btn--primary" style="width:100%; border-radius:12px; padding:0.8rem; font-weight:600; display:flex; align-items:center; justify-content:center; gap:0.5rem;">
+                                    <span>Submit Review</span>
+                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                </button>
                             </form>
                         </div>
                     </div>
@@ -133,40 +181,52 @@
 
                 {{-- Show freelancer's submitted review --}}
                 @if ($booking->freelancerReview)
-                    <div class="panel" style="margin-top:1.5rem">
-                        <div class="panel__header"><h2 class="panel__title">Your Review of Mentor</h2></div>
-                        <div class="panel__body">
-                            <div class="review-card__stars" style="margin-bottom:.5rem">
-                                @for ($i = 1; $i <= 5; $i++)
-                                    <svg width="14" height="14" viewBox="0 0 16 16" fill="{{ $i <= $booking->freelancerReview->rating ? 'currentColor' : 'none' }}"
-                                         class="review__star {{ $i <= $booking->freelancerReview->rating ? 'review__star--filled' : '' }}">
-                                        <path d="M8 1l2.12 4.3 4.74.7-3.43 3.34.81 4.72L8 11.77l-4.24 2.29.81-4.72L1.14 6l4.74-.7z"/>
-                                    </svg>
-                                @endfor
+                    <div class="review-panel">
+                        <div class="review-panel__header">
+                            <h2 class="review-panel__title">✨ Your Review of Mentor</h2>
+                        </div>
+                        <div class="review-panel__body">
+                            <div class="review-display-card">
+                                <div class="review-display-card__quote">“</div>
+                                <div class="review-card__stars" style="margin-bottom:0.75rem; display:flex; gap:0.25rem;">
+                                    @for ($i = 1; $i <= 5; $i++)
+                                        <svg width="18" height="18" viewBox="0 0 16 16" fill="{{ $i <= $booking->freelancerReview->rating ? '#f59e0b' : 'none' }}"
+                                             stroke="{{ $i <= $booking->freelancerReview->rating ? 'none' : '#d1d5db' }}">
+                                            <path d="M8 1l2.12 4.3 4.74.7-3.43 3.34.81 4.72L8 11.77l-4.24 2.29.81-4.72L1.14 6l4.74-.7z"/>
+                                        </svg>
+                                    @endfor
+                                    <span style="font-weight:700; font-size:0.875rem; color:#f59e0b; margin-left:0.35rem;">{{ $booking->freelancerReview->rating }}.0/5</span>
+                                </div>
+                                @if ($booking->freelancerReview->comment)
+                                    <p class="review-display-card__comment">"{{ $booking->freelancerReview->comment }}"</p>
+                                @endif
                             </div>
-                            @if ($booking->freelancerReview->comment)
-                                <p style="color:var(--text-secondary)">"{{ $booking->freelancerReview->comment }}"</p>
-                            @endif
                         </div>
                     </div>
                 @endif
 
                 {{-- Show mentor's review of freelancer --}}
                 @if ($booking->mentorReview)
-                    <div class="panel" style="margin-top:1.5rem">
-                        <div class="panel__header"><h2 class="panel__title">Mentor's Review of You</h2></div>
-                        <div class="panel__body">
-                            <div class="review-card__stars" style="margin-bottom:.5rem">
-                                @for ($i = 1; $i <= 5; $i++)
-                                    <svg width="14" height="14" viewBox="0 0 16 16" fill="{{ $i <= $booking->mentorReview->rating ? 'currentColor' : 'none' }}"
-                                         class="review__star {{ $i <= $booking->mentorReview->rating ? 'review__star--filled' : '' }}">
-                                        <path d="M8 1l2.12 4.3 4.74.7-3.43 3.34.81 4.72L8 11.77l-4.24 2.29.81-4.72L1.14 6l4.74-.7z"/>
-                                    </svg>
-                                @endfor
+                    <div class="review-panel">
+                        <div class="review-panel__header">
+                            <h2 class="review-panel__title">🎓 Mentor's Review of You</h2>
+                        </div>
+                        <div class="review-panel__body">
+                            <div class="review-display-card">
+                                <div class="review-display-card__quote">“</div>
+                                <div class="review-card__stars" style="margin-bottom:0.75rem; display:flex; gap:0.25rem;">
+                                    @for ($i = 1; $i <= 5; $i++)
+                                        <svg width="18" height="18" viewBox="0 0 16 16" fill="{{ $i <= $booking->mentorReview->rating ? '#f59e0b' : 'none' }}"
+                                             stroke="{{ $i <= $booking->mentorReview->rating ? 'none' : '#d1d5db' }}">
+                                            <path d="M8 1l2.12 4.3 4.74.7-3.43 3.34.81 4.72L8 11.77l-4.24 2.29.81-4.72L1.14 6l4.74-.7z"/>
+                                        </svg>
+                                    @endfor
+                                    <span style="font-weight:700; font-size:0.875rem; color:#f59e0b; margin-left:0.35rem;">{{ $booking->mentorReview->rating }}.0/5</span>
+                                </div>
+                                @if ($booking->mentorReview->comment)
+                                    <p class="review-display-card__comment">"{{ $booking->mentorReview->comment }}"</p>
+                                @endif
                             </div>
-                            @if ($booking->mentorReview->comment)
-                                <p style="color:var(--text-secondary)">"{{ $booking->mentorReview->comment }}"</p>
-                            @endif
                         </div>
                     </div>
                 @endif
@@ -175,21 +235,55 @@
                 @if (in_array($booking->status->value, ['completed', 'reviewed']))
                     @if ($booking->mentorshipRelationship)
                         {{-- Relationship already exists — show status --}}
-                        <div class="panel" style="margin-top:1.5rem;border-left:3px solid var(--color-primary)">
-                            <div class="panel__header"><h2 class="panel__title">Long-Term Mentorship</h2></div>
-                            <div class="panel__body">
-                                <div style="display:flex;align-items:center;gap:.75rem">
-                                    <span class="badge badge--{{ $booking->mentorshipRelationship->status->colorClass() }}">
-                                        {{ $booking->mentorshipRelationship->status->label() }}
-                                    </span>
-                                    <span style="color:var(--color-text-muted);font-size:.9rem">
-                                        Request sent {{ $booking->mentorshipRelationship->requested_at->diffForHumans() }}
-                                    </span>
+                        <div class="lt-card">
+                            <div class="lt-card__header">
+                                <h2 class="lt-card__title">
+                                    <span>🚀</span> Long-Term Mentorship
+                                </h2>
+                                <span class="lt-card__status-badge">
+                                    <span style="width:7px;height:7px;border-radius:50%;background:#ffffff;display:inline-block"></span>
+                                    {{ $booking->mentorshipRelationship->status->label() }}
+                                </span>
+                            </div>
+                            <div class="lt-card__body">
+                                <div class="lt-card__applicant">
+                                    @if($booking->mentor->avatar_url)
+                                        <img src="{{ $booking->mentor->avatar_url }}" alt="{{ $booking->mentor->full_name }}" class="lt-card__avatar">
+                                    @else
+                                        <div class="lt-card__avatar" style="background:#e0e7ff; color:#4f46e5; display:flex; align-items:center; justify-content:center; font-weight:700;">
+                                            {{ strtoupper(substr($booking->mentor->first_name, 0, 1) . substr($booking->mentor->last_name, 0, 1)) }}
+                                        </div>
+                                    @endif
+                                    <div>
+                                        <h3 class="lt-card__applicant-name">{{ $booking->mentor->full_name }}</h3>
+                                        <div class="lt-card__applicant-sub">
+                                            Sent {{ $booking->mentorshipRelationship->requested_at->diffForHumans() }} &middot; Mentor
+                                        </div>
+                                    </div>
                                 </div>
+
+                                <div class="lt-card__info-grid">
+                                    <div class="lt-card__info-item">
+                                        <span class="lt-card__info-label">💳 Payment Model</span>
+                                        <span class="lt-card__info-val">{{ ucfirst($booking->mentorshipRelationship->payment_type ?? 'Not specified') }}</span>
+                                    </div>
+                                    <div class="lt-card__info-item">
+                                        <span class="lt-card__info-label">💰 Rate / Amount</span>
+                                        <span class="lt-card__info-val">
+                                            {{ $booking->mentorshipRelationship->payment_amount ? '$' . number_format($booking->mentorshipRelationship->payment_amount, 2) : 'Custom' }}
+                                        </span>
+                                    </div>
+                                    @if($booking->mentorshipRelationship->duration_months)
+                                    <div class="lt-card__info-item">
+                                        <span class="lt-card__info-label">⏱️ Duration</span>
+                                        <span class="lt-card__info-val">{{ $booking->mentorshipRelationship->duration_months }} Month{{ $booking->mentorshipRelationship->duration_months > 1 ? 's' : '' }}</span>
+                                    </div>
+                                    @endif
+                                </div>
+
                                 @if($booking->mentorshipRelationship->isAccepted())
-                                    <a href="{{ route('lms.index') }}"
-                                       class="btn btn--primary btn--sm" style="margin-top:1rem">
-                                        → Go to My Learning
+                                    <a href="{{ route('lms.index') }}" class="lt-card__btn-primary">
+                                        <span>→ Go to My Learning Portal</span>
                                     </a>
                                 @endif
                             </div>

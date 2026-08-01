@@ -232,12 +232,11 @@
         </div>
 
         {{-- Pagination --}}
+        @if ($logs->hasPages())
         <div class="adm-pagination">
-            <span style="font-size:12px;color:var(--adm-text-400);">
-                Showing {{ $logs->firstItem() }}–{{ $logs->lastItem() }} of {{ number_format($logs->total()) }} events
-            </span>
-            {{ $logs->links('partials.pagination') }}
+            {{ $logs->links() }}
         </div>
+        @endif
 
     @else
         <div class="adm-empty" style="padding:60px 20px;">

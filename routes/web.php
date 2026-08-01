@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\AuditLogController;
 use App\Http\Controllers\Admin\GigManagementController;
 use App\Http\Controllers\Admin\RegistrationApprovalController;
+use App\Http\Controllers\Admin\SkillManagementController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\PasswordResetController;
@@ -19,6 +20,7 @@ use App\Http\Controllers\Lms\MentorshipRelationshipController;
 use App\Http\Controllers\Mentor\DashboardController as MentorDashboardController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SkillOnboardingController;
 use Illuminate\Support\Facades\Route;
 
 /**
@@ -138,6 +140,16 @@ Route::middleware('auth')->group(function () {
 
         // Gig management
         Route::get('/admin/gigs', [GigManagementController::class, 'index'])->name('admin.gigs.index');
+
+        // Skill management (CRUD)
+        Route::resource('/admin/skills', SkillManagementController::class)->names([
+            'index'   => 'admin.skills.index',
+            'create'  => 'admin.skills.create',
+            'store'   => 'admin.skills.store',
+            'edit'    => 'admin.skills.edit',
+            'update'  => 'admin.skills.update',
+            'destroy' => 'admin.skills.destroy',
+        ]);
     });
 
     /* ─── LMS: Freelancer ─── */
@@ -145,6 +157,10 @@ Route::middleware('auth')->group(function () {
         // Send a long-term request from a completed booking
         Route::post('relationships', [MentorshipRelationshipController::class, 'requestLongTerm'])
             ->name('relationships.request');
+
+        // Renew an existing accepted mentorship
+        Route::post('relationships/{relationship}/renew', [MentorshipRelationshipController::class, 'renew'])
+            ->name('relationships.renew');
 
         // Enrolled courses dashboard
         Route::get('', [FreelancerLmsController::class, 'index'])->name('index');
@@ -206,4 +222,12 @@ Route::middleware('auth')->group(function () {
         Route::delete('lessons/{lesson}', [ModuleLessonController::class, 'destroyLesson'])
             ->name('lessons.destroy');
     });
+});
+
+/* ═══ Skill Onboarding Routes ═══ */
+Route::middleware('auth')->group(function () {
+    Route::get('/onboarding/skills', [SkillOnboardingController::class, 'show'])
+        ->name('onboarding.skills.show');
+    Route::post('/onboarding/skills', [SkillOnboardingController::class, 'store'])
+        ->name('onboarding.skills.store');
 });

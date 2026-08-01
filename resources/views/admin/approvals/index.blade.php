@@ -142,7 +142,7 @@
                             {{-- Approve --}}
                             <form method="POST"
                                   action="{{ route('admin.approvals.approve', $user) }}"
-                                  onsubmit="return confirm('Approve {{ addslashes($user->full_name) }}?')">
+                                  onsubmit="return confirmApproveUser(this, '{{ addslashes($user->full_name) }}')">
                                 @csrf @method('PATCH')
                                 <button type="submit" class="adm-btn adm-btn--success adm-btn--sm" style="width:110px;">
                                     ✓ Approve

@@ -64,6 +64,18 @@ class LoginController extends Controller
             }
         }
 
+        // --- Disabled account gate ---
+        // Applies to all roles (including admin) — if is_active is false, deny login.
+        if (! $user->is_active) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return redirect()->route('login')
+                ->with('disabled_account', true)
+                ->withInput($request->only('email'));
+        }
+
         $request->session()->regenerate();
 
         AuditLog::log(
@@ -103,13 +115,23 @@ class LoginController extends Controller
 
     /**
      * Redirect authenticated user to their role-specific dashboard.
+     * Non-admin users who haven't set skill preferences are redirected to onboarding first.
      */
     private function redirectBasedOnRole(): RedirectResponse
     {
         $user = auth()->user();
 
+        // Admins skip onboarding entirely
+        if ($user->isAdmin()) {
+            return redirect()->route('admin.dashboard');
+        }
+
+        // If this user hasn't picked skills yet, redirect to onboarding
+        if (! $user->skills_onboarded) {
+            return redirect()->route('onboarding.skills.show');
+        }
+
         return match (true) {
-            $user->isAdmin()      => redirect()->route('admin.dashboard'),
             $user->isMentor()     => redirect()->route('mentor.dashboard'),
             $user->isFreelancer() => redirect()->route('freelancer.dashboard'),
             default               => redirect()->route('home'),

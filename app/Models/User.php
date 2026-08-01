@@ -34,6 +34,7 @@ class User extends Authenticatable
         'is_active',
         'account_status',
         'rejection_reason',
+        'skills_onboarded',
     ];
 
     protected $hidden = [
@@ -51,6 +52,7 @@ class User extends Authenticatable
             'total_reviews'     => 'integer',
             'is_active'         => 'boolean',
             'account_status'    => 'string',
+            'skills_onboarded'  => 'boolean',
         ];
     }
 
@@ -150,6 +152,11 @@ class User extends Authenticatable
     public function enrollments(): HasMany
     {
         return $this->hasMany(Enrollment::class, 'freelancer_id');
+    }
+
+    public function skills(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(Skill::class, 'skill_user');
     }
 
     /* ─── Scopes ─── */

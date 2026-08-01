@@ -174,7 +174,7 @@
                             {{-- Toggle disable/enable --}}
                             <form method="POST"
                                   action="{{ route('admin.users.toggle', $user) }}"
-                                  onsubmit="return confirm('{{ $user->is_active ? 'Disable' : 'Enable' }} {{ addslashes($user->full_name) }}?')">
+                                  onsubmit="return confirmDisableUser(this, '{{ addslashes($user->full_name) }}', {{ $user->is_active ? 'true' : 'false' }})">
                                 @csrf @method('PATCH')
                                 <button type="submit"
                                         class="adm-btn adm-btn--sm {{ $user->is_active ? 'adm-btn--amber-action' : 'adm-btn--success' }}">
@@ -185,7 +185,7 @@
                             {{-- Remove account --}}
                             <form method="POST"
                                   action="{{ route('admin.users.destroy', $user) }}"
-                                  onsubmit="return confirm('Permanently delete {{ addslashes($user->full_name) }}? This cannot be undone.')">
+                                  onsubmit="return confirmRemoveUser(this, '{{ addslashes($user->full_name) }}')">
                                 @csrf @method('DELETE')
                                 <button type="submit" class="adm-btn adm-btn--danger adm-btn--sm">
                                     Remove

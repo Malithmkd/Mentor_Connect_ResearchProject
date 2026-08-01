@@ -58,6 +58,11 @@
         </nav>
 
         <div class="site-header__actions">
+            {{-- Theme toggle (always visible) --}}
+            <button id="themeToggleBtn" class="site-header__theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark/light mode" title="Toggle dark/light mode">
+                <span id="themeToggleIcon">🌙</span>
+            </button>
+
             @guest
                 <a href="{{ route('login') }}" class="btn btn--ghost btn--sm">Sign In</a>
                 <a href="{{ route('register') }}" class="btn btn--primary btn--sm">Get Started</a>
@@ -116,9 +121,9 @@
                             </a>
                         @endrole
                         <div class="site-header__dropdown-divider"></div>
-                        <form method="POST" action="{{ route('logout') }}" class="site-header__dropdown-form">
+                        <form method="POST" action="{{ route('logout') }}" class="site-header__dropdown-form" id="logoutFormDesktop">
                             @csrf
-                            <button type="submit" class="site-header__dropdown-item site-header__dropdown-item--danger">
+                            <button type="button" class="site-header__dropdown-item site-header__dropdown-item--danger" onclick="confirmLogout('logoutFormDesktop')">
                                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                                     <path d="M6 3H3v10h3M6 8h7m0 0l-3-3m3 3l-3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                                 </svg>
@@ -145,9 +150,9 @@
         @auth
             <a href="{{ route('profile.show') }}" class="site-header__mobile-link">My Profile</a>
             <a href="{{ route('notifications.index') }}" class="site-header__mobile-link">Notifications</a>
-            <form method="POST" action="{{ route('logout') }}">
+            <form method="POST" action="{{ route('logout') }}" id="logoutFormMobile">
                 @csrf
-                <button type="submit" class="site-header__mobile-link site-header__mobile-link--btn">Sign Out</button>
+                <button type="button" class="site-header__mobile-link site-header__mobile-link--btn" onclick="confirmLogout('logoutFormMobile')">Sign Out</button>
             </form>
         @endauth
         @guest
@@ -156,3 +161,21 @@
         @endguest
     </nav>
 </header>
+
+<script>
+/* ── Theme toggle ── */
+function toggleTheme() {
+    var html = document.getElementById('htmlRoot');
+    var current = html.getAttribute('data-theme') || 'light';
+    var next = current === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', next);
+    localStorage.setItem('mc-theme', next);
+    updateThemeIcon();
+}
+function updateThemeIcon() {
+    var current = (document.getElementById('htmlRoot') || document.documentElement).getAttribute('data-theme');
+    var icon = document.getElementById('themeToggleIcon');
+    if (icon) icon.textContent = current === 'dark' ? '☀️' : '🌙';
+}
+document.addEventListener('DOMContentLoaded', updateThemeIcon);
+</script>

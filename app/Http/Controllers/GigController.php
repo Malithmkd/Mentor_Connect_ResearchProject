@@ -57,23 +57,41 @@ class GigController extends Controller
             $query->where('average_rating', '>=', $validated['min_rating']);
         }
 
+        // ── Skill-Based Personalization ──
+        // For authenticated users with saved skill preferences, boost matching gigs.
+        // Only applies when no explicit skill filter is active (to avoid double-filtering).
+        $userSkillIds = [];
+        if (auth()->check() && empty($validated['skills'])) {
+            $userSkillIds = auth()->user()->skills()->pluck('skills.id')->toArray();
+        }
+
         // Sorting
         $sort = $validated['sort'] ?? 'newest';
-        match ($sort) {
-            'rating' => $query->orderByRating('desc'),
-            'price_asc' => $query->orderByPrice('asc'),
-            'price_desc' => $query->orderByPrice('desc'),
-            'popularity' => $query->orderByPopularity(),
-            default => $query->latest(),
-        };
+
+        if (!empty($userSkillIds) && $sort === 'newest') {
+            // Boost gigs that share skills with the user using a scalar subquery.
+            // Avoids join/groupBy MySQL ONLY_FULL_GROUP_BY strict mode errors during pagination.
+            $skillIdsCsv = implode(',', array_map('intval', $userSkillIds));
+            $query->orderByRaw("(SELECT COUNT(*) FROM gig_skill WHERE gig_skill.gig_id = gigs.id AND gig_skill.skill_id IN ({$skillIdsCsv})) DESC")
+                  ->latest('gigs.created_at');
+        } else {
+            match ($sort) {
+                'rating'     => $query->orderByRating('desc'),
+                'price_asc'  => $query->orderByPrice('asc'),
+                'price_desc' => $query->orderByPrice('desc'),
+                'popularity' => $query->orderByPopularity(),
+                default      => $query->latest(),
+            };
+        }
 
         $gigs = $query->paginate($validated['per_page'] ?? 12);
         $skills = Skill::active()->orderBy('name')->get();
 
         return view('gigs.index', [
-            'gigs' => $gigs,
-            'skills' => $skills,
-            'filters' => $validated,
+            'gigs'          => $gigs,
+            'skills'        => $skills,
+            'filters'       => $validated,
+            'activeFilters' => collect($validated)->filter(fn($v) => !empty($v))->count(),
         ]);
     }
 

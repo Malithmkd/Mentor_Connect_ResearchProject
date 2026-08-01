@@ -172,4 +172,19 @@
 }
 </style>
 @endpush
-
+@push('scripts')
+@if (session('disabled_account'))
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    Swal.fire({
+        icon: 'error',
+        title: 'Account Disabled',
+        text: 'Your account has been disabled. Please contact the administrator.',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#4f46e5',
+        customClass: { popup: 'swal-rounded' }
+    });
+});
+</script>
+@endif
+@endpush

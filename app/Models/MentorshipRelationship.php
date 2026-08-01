@@ -30,14 +30,18 @@ class MentorshipRelationship extends Model
         'requested_at',
         'accepted_at',
         'ended_at',
+        'duration_months',
+        'expires_at',
     ];
 
     protected $casts = [
-        'status'         => RelationshipStatus::class,
-        'payment_amount' => 'decimal:2',
-        'requested_at'   => 'datetime',
-        'accepted_at'    => 'datetime',
-        'ended_at'       => 'datetime',
+        'status'          => RelationshipStatus::class,
+        'payment_amount'  => 'decimal:2',
+        'requested_at'    => 'datetime',
+        'accepted_at'     => 'datetime',
+        'ended_at'        => 'datetime',
+        'expires_at'      => 'datetime',
+        'duration_months' => 'integer',
     ];
 
     /* ─── Relationships ─── */
@@ -109,5 +113,31 @@ class MentorshipRelationship extends Model
     public function scopeAccepted($query)
     {
         return $query->where('status', RelationshipStatus::ACCEPTED);
+    }
+
+    /* ─── Duration Helpers ─── */
+
+    /**
+     * Days remaining until the mentorship expires.
+     * Returns null if no expiry is set.
+     */
+    public function daysRemaining(): ?int
+    {
+        if (! $this->expires_at) {
+            return null;
+        }
+        $days = (int) now()->diffInDays($this->expires_at, false);
+        return max(0, $days);
+    }
+
+    /**
+     * Whether the mentorship has expired.
+     */
+    public function isExpired(): bool
+    {
+        if (! $this->expires_at) {
+            return false;
+        }
+        return now()->isAfter($this->expires_at);
     }
 }

@@ -44,6 +44,11 @@ class Skill extends Model
         return $this->belongsToMany(Gig::class);
     }
 
+    public function users(): BelongsToMany
+    {
+        return $this->belongsToMany(\App\Models\User::class, 'skill_user');
+    }
+
     /* ─── Scopes ─── */
 
     public function scopeActive($query)

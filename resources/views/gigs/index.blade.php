@@ -12,9 +12,20 @@
 
 <section class="browse">
     <div class="browse__inner">
+
+        {{-- Mobile filter toggle --}}
+        @php $activeFilters = collect($filters)->filter(fn($v) => !empty($v))->count(); @endphp
+        <button class="browse__filter-toggle" id="filterToggleBtn" onclick="toggleFilters()" aria-expanded="false" aria-controls="filterDrawer">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M4 8h8M6 12h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            <span id="filterToggleLabel">Show Filters</span>
+            @if($activeFilters > 0)
+                <span class="browse__filter-badge">{{ $activeFilters }}</span>
+            @endif
+        </button>
+
         {{-- Search & Filters --}}
-        <aside class="browse__filters">
-            <form method="GET" action="{{ route('gigs.index') }}" class="filters">
+        <aside class="browse__filters" id="filterDrawer">
+            <form method="GET" action="{{ route('gigs.index') }}" class="filters" id="mainFilterForm">
                 <div class="filters__group">
                     <label class="filters__label">Search</label>
                     <input type="text" name="q" class="filters__input" value="{{ $filters['q'] ?? '' }}" placeholder="Keywords...">
@@ -62,6 +73,17 @@
                     </select>
                 </div>
 
+                <div class="filters__group">
+                    <label class="filters__label">Sort By</label>
+                    <select name="sort" class="filters__select">
+                        <option value="newest" {{ ($filters['sort'] ?? '') === 'newest' ? 'selected' : '' }}>Newest</option>
+                        <option value="rating" {{ ($filters['sort'] ?? '') === 'rating' ? 'selected' : '' }}>Highest Rated</option>
+                        <option value="price_asc" {{ ($filters['sort'] ?? '') === 'price_asc' ? 'selected' : '' }}>Price: Low to High</option>
+                        <option value="price_desc" {{ ($filters['sort'] ?? '') === 'price_desc' ? 'selected' : '' }}>Price: High to Low</option>
+                        <option value="popularity" {{ ($filters['sort'] ?? '') === 'popularity' ? 'selected' : '' }}>Most Popular</option>
+                    </select>
+                </div>
+
                 <button type="submit" class="btn btn--primary btn--block btn--sm">Apply Filters</button>
                 <a href="{{ route('gigs.index') }}" class="btn btn--ghost btn--block btn--sm">Clear All</a>
             </form>
@@ -71,7 +93,7 @@
         <div class="browse__results">
             <div class="browse__toolbar">
                 <p class="browse__count">{{ $gigs->total() }} results</p>
-                <select name="sort" class="filters__select filters__select--inline" onchange="this.form.submit()">
+                <select name="sort" class="filters__select filters__select--inline" form="mainFilterForm" onchange="this.form.submit()">
                     <option value="newest" {{ ($filters['sort'] ?? '') === 'newest' ? 'selected' : '' }}>Newest</option>
                     <option value="rating" {{ ($filters['sort'] ?? '') === 'rating' ? 'selected' : '' }}>Highest Rated</option>
                     <option value="price_asc" {{ ($filters['sort'] ?? '') === 'price_asc' ? 'selected' : '' }}>Price: Low to High</option>
@@ -136,3 +158,132 @@
     </div>
 </section>
 @endsection
+
+@push('styles')
+<style>
+/* ── Responsive Find Mentor ── */
+.browse__filter-toggle {
+    display: none;
+    align-items: center;
+    gap: .5rem;
+    padding: .6rem 1.25rem;
+    margin-bottom: 1rem;
+    background: #fff;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: .875rem;
+    font-weight: 600;
+    color: #374151;
+    cursor: pointer;
+    width: 100%;
+    justify-content: center;
+    transition: background .15s, box-shadow .15s, border-color .15s;
+}
+.browse__filter-toggle:hover {
+    background: #f8fafc;
+    border-color: #c7d2fe;
+    box-shadow: 0 1px 4px rgba(79,70,229,.08);
+}
+.browse__filter-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 5px;
+    border-radius: 10px;
+    background: #4f46e5;
+    color: #fff;
+    font-size: .7rem;
+    font-weight: 700;
+}
+
+@media (max-width: 768px) {
+    .browse__filter-toggle {
+        display: flex;
+    }
+    .browse__inner {
+        flex-direction: column !important;
+        gap: 0 !important;
+    }
+    .browse__filters {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: unset !important;
+        overflow: hidden;
+        max-height: 0;
+        opacity: 0;
+        transition: max-height .35s ease, opacity .25s ease, margin .25s ease;
+        margin-bottom: 0;
+        position: static !important;
+    }
+    .browse__filters.is-open {
+        max-height: 1600px;
+        opacity: 1;
+        margin-bottom: 1.25rem;
+        padding: 1rem;
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+    }
+    .gig-grid {
+        grid-template-columns: 1fr !important;
+    }
+    .filters__skills {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+    .browse__toolbar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: .5rem;
+    }
+    .filters__select--inline {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .filters__skills {
+        grid-template-columns: 1fr !important;
+    }
+    .gig-card__meta {
+        flex-wrap: wrap;
+    }
+    .page-header__title {
+        font-size: 1.5rem !important;
+    }
+}
+
+/* Dark mode support */
+[data-theme="dark"] .browse__filter-toggle {
+    background: var(--dm-surface, #1e293b);
+    border-color: var(--dm-border, #334155);
+    color: var(--dm-text, #e2e8f0);
+}
+[data-theme="dark"] .browse__filters.is-open {
+    background: var(--dm-surface, #1e293b);
+    border-color: var(--dm-border, #334155);
+}
+</style>
+@endpush
+
+@push('scripts')
+<script>
+function toggleFilters() {
+    const drawer = document.getElementById('filterDrawer');
+    const btn    = document.getElementById('filterToggleBtn');
+    const label  = document.getElementById('filterToggleLabel');
+    const isOpen = drawer.classList.toggle('is-open');
+    btn.setAttribute('aria-expanded', isOpen);
+    label.textContent = isOpen ? 'Hide Filters' : 'Show Filters';
+}
+
+// Auto-open drawer if there are active filters on mobile
+(function () {
+    const activeFilters = {{ $activeFilters }};
+    if (activeFilters > 0 && window.innerWidth <= 768) {
+        toggleFilters();
+    }
+})();
+</script>
+@endpush

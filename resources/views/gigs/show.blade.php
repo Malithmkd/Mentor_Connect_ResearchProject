@@ -149,9 +149,6 @@
                                 @role('mentor')
                                     <p>You cannot book sessions as a mentor.</p>
                                 @endrole
-                                @if (!auth()->user()->hasVerifiedEmail())
-                                    <p>Please <a href="{{ route('verification.notice') }}">verify your email</a> to book sessions.</p>
-                                @endif
                             </div>
                         @endcan
                     @else

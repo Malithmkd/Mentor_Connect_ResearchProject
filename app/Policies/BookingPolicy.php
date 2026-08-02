@@ -41,7 +41,7 @@ class BookingPolicy
      */
     public function create(User $user): bool
     {
-        return $user->isFreelancer() && $user->hasVerifiedEmail();
+        return $user->isFreelancer();
     }
 
     /**

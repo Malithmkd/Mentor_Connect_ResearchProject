@@ -55,7 +55,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('browse-gigs', fn(User $user) => true); // All roles can browse
 
         Gate::define('book-session', fn(User $user) =>
-            $user->isFreelancer() && $user->hasVerifiedEmail()
+            $user->isFreelancer()
         );
 
         Gate::define('create-gig', fn(User $user) =>

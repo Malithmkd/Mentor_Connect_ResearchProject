@@ -376,7 +376,6 @@
 .adm-sidebar__user-role { font-size: 11px; color: var(--adm-text-400); }
 
 /* Collapsible parent group */
-.adm-sidebar__group {}
 .adm-sidebar__group-toggle {
   display: flex;
   align-items: center;

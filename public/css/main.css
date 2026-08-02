@@ -859,6 +859,11 @@ ol {
 
 .site-header__mobile-nav {
     display: none;
+    background: var(--color-white);
+    border-top: 1px solid var(--color-gray-200);
+    padding: var(--space-4);
+    flex-direction: column;
+    gap: var(--space-1);
 }
 
 @media (min-width: 768px) {
@@ -873,15 +878,6 @@ ol {
     .site-header__mobile-toggle {
         display: none;
     }
-}
-
-/* Mobile nav */
-.site-header__mobile-nav {
-    background: var(--color-white);
-    border-top: 1px solid var(--color-gray-200);
-    padding: var(--space-4);
-    flex-direction: column;
-    gap: var(--space-1);
 }
 
 .site-header__mobile-nav--open {
@@ -1499,6 +1495,7 @@ ol {
 .hero__title-highlight {
     background: linear-gradient(135deg, #4f46e5 0%, #9333ea 50%, #ec4899 100%);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
     display: inline-block;
 }

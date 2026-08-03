@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\BookingStatus;
+use App\Http\Requests\Booking\MentorNoteRequest;
 use App\Http\Requests\Booking\ReviewRequest;
 use App\Http\Requests\Booking\StoreBookingRequest;
 use App\Http\Requests\Booking\UpdateStatusRequest;
@@ -292,6 +293,29 @@ class BookingController extends Controller
         return redirect()
             ->route($redirectRoute)
             ->with('success', 'Review submitted! Thank you for your feedback.');
+    }
+
+    /**
+     * Mentor sends a reply note back to the freelancer on a booking.
+     */
+    public function replyNote(MentorNoteRequest $request, Booking $booking): RedirectResponse
+    {
+        $data = $request->validated();
+
+        $booking->update(['mentor_note' => $data['mentor_note']]);
+
+        // Notify the freelancer that the mentor replied with a note
+        Notification::create([
+            'user_id'           => $booking->freelancer_id,
+            'type'              => 'booking_note_reply',
+            'title'             => 'Mentor Replied to Your Note',
+            'message'           => "{$booking->mentor->full_name} sent you a reply note for '{$booking->gig->title}'.",
+            'action_url'        => route('freelancer.bookings.show', $booking),
+            'action_text'       => 'View Note',
+            'related_booking_id'=> $booking->id,
+        ]);
+
+        return redirect()->back()->with('success', 'Your reply note has been sent to the freelancer.');
     }
 
     /**

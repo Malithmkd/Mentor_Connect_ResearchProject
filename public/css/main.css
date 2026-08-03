@@ -4172,3 +4172,123 @@ ol {
 [data-theme="dark"] .lt-card__notes-text {
     color: #f3e8ff;
 }
+/* --- Session Notes Conversation Thread --- */
+
+.session-notes-thread {
+    background: linear-gradient(135deg, #f8faff 0%, #f0f4ff 100%);
+    border: 1px solid #e0e7ff;
+    border-radius: 16px;
+    padding: 1.25rem 1.25rem 1rem;
+    margin-top: 1rem;
+}
+
+.session-notes-thread__header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #e0e7ff;
+}
+
+.session-notes-thread__icon { font-size: 1.1rem; }
+
+.session-notes-thread__title {
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: #4f46e5;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+}
+
+.session-note-bubble {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 0.85rem;
+    padding: 0.85rem 1rem;
+    border-radius: 12px;
+    position: relative;
+}
+.session-note-bubble:last-of-type { margin-bottom: 0; }
+
+.session-note-bubble--freelancer {
+    background: #eef2ff;
+    border-left: 3px solid #818cf8;
+}
+
+.session-note-bubble--mentor {
+    background: #ecfdf5;
+    border-left: 3px solid #10b981;
+}
+
+.session-note-bubble__meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.session-note-bubble__avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #818cf8;
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.session-note-bubble__avatar--mentor { background: #10b981; }
+
+.session-note-bubble__name {
+    font-weight: 700;
+    font-size: 0.82rem;
+    color: #374151;
+}
+
+.session-note-bubble__role {
+    font-size: 0.75rem;
+    color: #6b7280;
+    background: #f3f4f6;
+    border-radius: 20px;
+    padding: 0.1rem 0.5rem;
+}
+
+.session-note-bubble__text {
+    font-size: 0.9rem;
+    color: #374151;
+    line-height: 1.6;
+    margin: 0;
+    white-space: pre-wrap;
+}
+
+.session-note-bubble__awaiting {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: #9ca3af;
+    font-size: 0.82rem;
+    font-style: italic;
+    padding: 0.5rem 0.75rem;
+    background: #f9fafb;
+    border-radius: 8px;
+    border: 1px dashed #d1d5db;
+    margin-top: 0.25rem;
+}
+
+/* Dark mode */
+[data-theme="dark"] .session-notes-thread {
+    background: linear-gradient(135deg, #1e1b4b 0%, #1a1a3e 100%);
+    border-color: #3730a3;
+}
+[data-theme="dark"] .session-notes-thread__header { border-color: #3730a3; }
+[data-theme="dark"] .session-notes-thread__title { color: #818cf8; }
+[data-theme="dark"] .session-note-bubble--freelancer { background: #1e1b4b; border-left-color: #818cf8; }
+[data-theme="dark"] .session-note-bubble--mentor { background: #052e16; border-left-color: #10b981; }
+[data-theme="dark"] .session-note-bubble__name { color: #f1f5f9; }
+[data-theme="dark"] .session-note-bubble__role { background: #374151; color: #9ca3af; }
+[data-theme="dark"] .session-note-bubble__text { color: #e2e8f0; }
+[data-theme="dark"] .session-note-bubble__awaiting { background: #1f2937; border-color: #374151; color: #6b7280; }

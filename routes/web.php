@@ -109,6 +109,7 @@ Route::middleware('auth')->group(function () {
     Route::patch('/bookings/{booking}/status', [BookingController::class, 'updateStatus'])->name('bookings.status');
     Route::post('/bookings/{booking}/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel');
     Route::post('/bookings/{booking}/review', [BookingController::class, 'review'])->name('bookings.review');
+    Route::post('/bookings/{booking}/reply-note', [BookingController::class, 'replyNote'])->name('bookings.replyNote');
 
     /* ─── Admin Routes ─── */
     Route::middleware('role:admin')->group(function () {

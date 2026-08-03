@@ -111,10 +111,41 @@
                         </div>
                     @endif
 
-                    @if ($booking->freelancer_note)
-                        <div class="session-note-box">
-                            <div class="session-note-box__label">Your Note / Learning Goals</div>
-                            <p class="session-note-box__text">"{{ $booking->freelancer_note }}"</p>
+                    {{-- Note Conversation Thread --}}
+                    @if ($booking->freelancer_note || $booking->mentor_note)
+                        <div class="session-notes-thread">
+                            <div class="session-notes-thread__header">
+                                <span class="session-notes-thread__icon">&#x1F4AC;</span>
+                                <span class="session-notes-thread__title">Session Notes</span>
+                            </div>
+
+                            @if ($booking->freelancer_note)
+                                <div class="session-note-bubble session-note-bubble--freelancer">
+                                    <div class="session-note-bubble__meta">
+                                        <span class="session-note-bubble__avatar">{{ strtoupper(substr($booking->freelancer->first_name, 0, 1)) }}</span>
+                                        <span class="session-note-bubble__name">You</span>
+                                        <span class="session-note-bubble__role">Freelancer</span>
+                                    </div>
+                                    <p class="session-note-bubble__text">{{ $booking->freelancer_note }}</p>
+                                </div>
+                            @endif
+
+                            @if ($booking->mentor_note)
+                                <div class="session-note-bubble session-note-bubble--mentor">
+                                    <div class="session-note-bubble__meta">
+                                        <span class="session-note-bubble__avatar session-note-bubble__avatar--mentor">{{ strtoupper(substr($booking->mentor->first_name, 0, 1)) }}</span>
+                                        <span class="session-note-bubble__name">{{ $booking->mentor->full_name }}</span>
+                                        <span class="session-note-bubble__role">Mentor</span>
+                                    </div>
+                                    <p class="session-note-bubble__text">{{ $booking->mentor_note }}</p>
+                                </div>
+                            @else
+                                @if ($booking->freelancer_note)
+                                    <div class="session-note-bubble__awaiting">
+                                        <span>&#x23F3;</span> Waiting for mentor's reply note...
+                                    </div>
+                                @endif
+                            @endif
                         </div>
                     @endif
                 </div>

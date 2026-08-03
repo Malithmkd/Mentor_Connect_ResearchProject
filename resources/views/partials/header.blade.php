@@ -83,13 +83,13 @@
                 </a>
 
                 <div class="site-header__user" id="userMenu">
-                    <button class="site-header__user-toggle" aria-expanded="false" aria-haspopup="true" onclick="document.getElementById('userDropdown').classList.toggle('site-header__dropdown--open')">
+                    <button class="site-header__user-toggle" aria-expanded="false" aria-haspopup="true" id="userMenuToggle" onclick="toggleUserDropdown(event)">
                         <img src="{{ auth()->user()->avatar_url }}"
                              alt="{{ auth()->user()->first_name }}"
                              class="site-header__user-avatar site-header__user-avatar--img"
                              width="32" height="32">
                         <span class="site-header__user-name">{{ auth()->user()->first_name }}</span>
-                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" class="site-header__chevron">
                             <path d="M3 5l3 3 3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                     </button>
@@ -135,32 +135,51 @@
             @endauth
         </div>
 
-        <button class="site-header__mobile-toggle" aria-label="Toggle navigation" onclick="document.getElementById('mobileNav').classList.toggle('site-header__mobile-nav--open')">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-            </svg>
+        <button class="site-header__mobile-toggle" id="mobileToggleBtn" aria-label="Toggle navigation" aria-expanded="false" onclick="toggleMobileNav()">
+            <span class="site-header__hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </span>
         </button>
     </div>
 
     <nav class="site-header__mobile-nav" id="mobileNav" aria-label="Mobile navigation">
         @if(!auth()->check() || !auth()->user()->isAdmin())
-            <a href="{{ route('home') }}" class="site-header__mobile-link">Home</a>
-            <a href="{{ route('gigs.index') }}" class="site-header__mobile-link">Find Mentors</a>
+            <a href="{{ route('home') }}" class="site-header__mobile-link {{ request()->routeIs('home') ? 'site-header__mobile-link--active' : '' }}">Home</a>
+            <a href="{{ route('gigs.index') }}" class="site-header__mobile-link {{ request()->routeIs('gigs.*') ? 'site-header__mobile-link--active' : '' }}">Find Mentors</a>
         @endif
         @auth
+            @role('freelancer')
+                <a href="{{ route('freelancer.dashboard') }}" class="site-header__mobile-link {{ request()->routeIs('freelancer.dashboard') ? 'site-header__mobile-link--active' : '' }}">Dashboard</a>
+                <a href="{{ route('lms.index') }}" class="site-header__mobile-link {{ request()->routeIs('lms.*') ? 'site-header__mobile-link--active' : '' }}">My Learning</a>
+            @endrole
+            @role('mentor')
+                <a href="{{ route('mentor.dashboard') }}" class="site-header__mobile-link {{ request()->routeIs('mentor.dashboard') ? 'site-header__mobile-link--active' : '' }}">Dashboard</a>
+                <a href="{{ route('mentor.lms.relationships.index') }}" class="site-header__mobile-link {{ request()->routeIs('mentor.lms.*') ? 'site-header__mobile-link--active' : '' }}">Long-term Mentorship</a>
+                <a href="{{ route('mentor.gigs.index') }}" class="site-header__mobile-link {{ request()->routeIs('mentor.gigs.*') ? 'site-header__mobile-link--active' : '' }}">My Gigs</a>
+            @endrole
+            @role('admin')
+                <a href="{{ route('admin.dashboard') }}" class="site-header__mobile-link {{ request()->routeIs('admin.*') ? 'site-header__mobile-link--active' : '' }}">Admin Dashboard</a>
+            @endrole
+            <div class="site-header__mobile-divider"></div>
             <a href="{{ route('profile.show') }}" class="site-header__mobile-link">My Profile</a>
             <a href="{{ route('notifications.index') }}" class="site-header__mobile-link">Notifications</a>
+            <div class="site-header__mobile-divider"></div>
             <form method="POST" action="{{ route('logout') }}" id="logoutFormMobile">
                 @csrf
-                <button type="button" class="site-header__mobile-link site-header__mobile-link--btn" onclick="confirmLogout('logoutFormMobile')">Sign Out</button>
+                <button type="button" class="site-header__mobile-link site-header__mobile-link--btn site-header__mobile-link--danger" onclick="confirmLogout('logoutFormMobile')">Sign Out</button>
             </form>
         @endauth
         @guest
+            <div class="site-header__mobile-divider"></div>
             <a href="{{ route('login') }}" class="site-header__mobile-link">Sign In</a>
             <a href="{{ route('register') }}" class="site-header__mobile-link site-header__mobile-link--primary">Get Started</a>
         @endguest
     </nav>
 </header>
+
+<div class="site-header__overlay" id="mobileOverlay" onclick="closeMobileNav()"></div>
 
 <script>
 /* ── Theme toggle ── */
@@ -178,4 +197,70 @@ function updateThemeIcon() {
     if (icon) icon.textContent = current === 'dark' ? '☀️' : '🌙';
 }
 document.addEventListener('DOMContentLoaded', updateThemeIcon);
+
+/* ── User dropdown toggle & outside click handling ── */
+function toggleUserDropdown(e) {
+    if (e) e.stopPropagation();
+    var dropdown = document.getElementById('userDropdown');
+    var btn = document.getElementById('userMenuToggle');
+    if (!dropdown) return;
+    var isOpen = dropdown.classList.contains('site-header__dropdown--open');
+    dropdown.classList.toggle('site-header__dropdown--open', !isOpen);
+    if (btn) btn.setAttribute('aria-expanded', String(!isOpen));
+}
+
+function closeUserDropdown() {
+    var dropdown = document.getElementById('userDropdown');
+    var btn = document.getElementById('userMenuToggle');
+    if (dropdown) dropdown.classList.remove('site-header__dropdown--open');
+    if (btn) btn.setAttribute('aria-expanded', 'false');
+}
+
+/* ── Mobile Nav toggle & backdrop handling ── */
+function toggleMobileNav() {
+    var nav = document.getElementById('mobileNav');
+    var overlay = document.getElementById('mobileOverlay');
+    var btn = document.getElementById('mobileToggleBtn');
+    if (!nav) return;
+    var isOpen = nav.classList.contains('site-header__mobile-nav--open');
+    if (isOpen) {
+        closeMobileNav();
+    } else {
+        nav.classList.add('site-header__mobile-nav--open');
+        if (overlay) overlay.classList.add('site-header__overlay--visible');
+        if (btn) {
+            btn.classList.add('site-header__mobile-toggle--open');
+            btn.setAttribute('aria-expanded', 'true');
+        }
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+function closeMobileNav() {
+    var nav = document.getElementById('mobileNav');
+    var overlay = document.getElementById('mobileOverlay');
+    var btn = document.getElementById('mobileToggleBtn');
+    if (nav) nav.classList.remove('site-header__mobile-nav--open');
+    if (overlay) overlay.classList.remove('site-header__overlay--visible');
+    if (btn) {
+        btn.classList.remove('site-header__mobile-toggle--open');
+        btn.setAttribute('aria-expanded', 'false');
+    }
+    document.body.style.overflow = '';
+}
+
+/* ── Global Dismissal (outside click & Escape key) ── */
+document.addEventListener('click', function(e) {
+    var menu = document.getElementById('userMenu');
+    if (menu && !menu.contains(e.target)) {
+        closeUserDropdown();
+    }
+});
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeUserDropdown();
+        closeMobileNav();
+    }
+});
 </script>

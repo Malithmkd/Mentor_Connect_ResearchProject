@@ -109,6 +109,11 @@ class Booking extends Model
         return $this->hasOne(Review::class)->whereColumn('reviews.reviewer_id', 'reviews.mentor_id');
     }
 
+    public function notes(): HasMany
+    {
+        return $this->hasMany(BookingNote::class)->oldest();
+    }
+
     /* ─── State Machine Methods ─── */
 
     public function transitionTo(BookingStatus $newStatus, ?string $note = null): bool

@@ -112,36 +112,34 @@
                     @endif
 
                     {{-- Note Conversation Thread --}}
-                    @if ($booking->freelancer_note || $booking->mentor_note)
-                        <div class="session-notes-thread">
-                            <div class="session-notes-thread__header">
-                                <span class="session-notes-thread__icon">&#x1F4AC;</span>
-                                <span class="session-notes-thread__title">Session Notes</span>
-                            </div>
-
-                            @if ($booking->freelancer_note)
-                                <div class="session-note-bubble session-note-bubble--freelancer">
-                                    <div class="session-note-bubble__meta">
-                                        <span class="session-note-bubble__avatar">{{ strtoupper(substr($booking->freelancer->first_name, 0, 1)) }}</span>
-                                        <span class="session-note-bubble__name">{{ $booking->freelancer->full_name }}</span>
-                                        <span class="session-note-bubble__role">Freelancer</span>
-                                    </div>
-                                    <p class="session-note-bubble__text">{{ $booking->freelancer_note }}</p>
-                                </div>
-                            @endif
-
-                            @if ($booking->mentor_note)
-                                <div class="session-note-bubble session-note-bubble--mentor">
-                                    <div class="session-note-bubble__meta">
-                                        <span class="session-note-bubble__avatar session-note-bubble__avatar--mentor">{{ strtoupper(substr($booking->mentor->first_name, 0, 1)) }}</span>
-                                        <span class="session-note-bubble__name">{{ $booking->mentor->full_name }}</span>
-                                        <span class="session-note-bubble__role">Mentor (You)</span>
-                                    </div>
-                                    <p class="session-note-bubble__text">{{ $booking->mentor_note }}</p>
-                                </div>
-                            @endif
+                    <div class="session-notes-thread">
+                        <div class="session-notes-thread__header">
+                            <span class="session-notes-thread__icon">&#x1F4AC;</span>
+                            <span class="session-notes-thread__title">Session Notes</span>
                         </div>
-                    @endif
+
+                        @forelse ($booking->notes as $note)
+                            <div class="session-note-bubble {{ $note->user_id === $booking->freelancer_id ? 'session-note-bubble--freelancer' : 'session-note-bubble--mentor' }}">
+                                <div class="session-note-bubble__meta">
+                                    <span class="session-note-bubble__avatar {{ $note->user_id === $booking->mentor_id ? 'session-note-bubble__avatar--mentor' : '' }}">
+                                        {{ strtoupper(substr($note->user->first_name, 0, 1)) }}
+                                    </span>
+                                    <span class="session-note-bubble__name">{{ $note->user->full_name }}</span>
+                                    <span class="session-note-bubble__role">
+                                        @if ($note->user_id === $booking->freelancer_id)
+                                            Freelancer
+                                        @else
+                                            Mentor (You)
+                                        @endif
+                                    </span>
+                                    <span style="font-size: 0.7rem; color: #a1a1aa; margin-left: auto;">{{ $note->created_at->diffForHumans() }}</span>
+                                </div>
+                                <p class="session-note-bubble__text">{{ $note->note }}</p>
+                            </div>
+                        @empty
+                            <p style="font-size: .85rem; color: var(--color-text-muted); padding: 1rem;">No notes yet.</p>
+                        @endforelse
+                    </div>
                 </div>
             </div>
 
@@ -200,54 +198,32 @@
                     </div>
                 @endif
 
-                {{-- Cancel --}}
-                @if (in_array($booking->status->value, ['requested', 'accepted', 'scheduled']))
-                    <div class="panel">
-                        <div class="panel__header"><h2 class="panel__title">Cancel</h2></div>
-                        <div class="panel__body">
-                            <form method="POST" action="{{ route('bookings.cancel', $booking) }}"
-                                  onsubmit="return confirm('Cancel this session?')">
-                                @csrf @method('DELETE')
-                                <button type="submit" class="btn btn--error btn--sm" style="width:100%">Cancel Session</button>
-                            </form>
-                        </div>
+                {{-- Add Note to Thread --}}
+                <div class="panel" style="margin-bottom:1.5rem; border-left: 3px solid var(--color-primary)">
+                    <div class="panel__header">
+                        <h2 class="panel__title">&#x1F4AC; Add a Note</h2>
                     </div>
-                @endif
-
-                {{-- Reply Note to Freelancer --}}
-                @if ($booking->freelancer_note)
-                    <div class="panel" style="margin-bottom:1.5rem; border-left: 3px solid var(--color-primary)">
-                        <div class="panel__header">
-                            <h2 class="panel__title">&#x1F4AC; Reply Note to Freelancer</h2>
-                        </div>
-                        <div class="panel__body">
-                            @if ($booking->mentor_note)
-                                <p style="font-size:.85rem; color:var(--color-text-muted); margin-bottom:.75rem">
-                                    ✅ You already sent a reply. Update it below if needed.
-                                </p>
-                            @else
-                                <p style="font-size:.85rem; color:var(--color-text-muted); margin-bottom:.75rem">
-                                    The freelancer sent you a note. Send a reply to let them know your thoughts or confirm details.
-                                </p>
-                            @endif
-                            <form method="POST" action="{{ route('bookings.replyNote', $booking) }}">
-                                @csrf
-                                <div class="form-group" style="margin-bottom:.75rem">
-                                    <textarea name="mentor_note" id="mentor_note_reply" class="form-input"
-                                              rows="4"
-                                              placeholder="Type your reply note here..."
-                                              style="width:100%; resize:vertical">{{ old('mentor_note', $booking->mentor_note) }}</textarea>
-                                    @error('mentor_note')
-                                        <p style="color:#ef4444; font-size:.8rem; margin-top:.35rem">{{ $message }}</p>
-                                    @enderror
-                                </div>
-                                <button type="submit" class="btn btn--primary btn--sm" style="width:100%">
-                                    {{ $booking->mentor_note ? 'Update Reply Note' : 'Send Reply Note' }} &#x2192;
-                                </button>
-                            </form>
-                        </div>
+                    <div class="panel__body">
+                        <p style="font-size:.85rem; color:var(--color-text-muted); margin-bottom:.75rem">
+                            Send a message to the freelancer to discuss session details.
+                        </p>
+                        <form method="POST" action="{{ route('bookings.storeNote', $booking) }}">
+                            @csrf
+                            <div class="form-group" style="margin-bottom:.75rem">
+                                <textarea name="note" id="note" class="form-input"
+                                          rows="3"
+                                          placeholder="Type your message here..."
+                                          style="width:100%; resize:vertical" required></textarea>
+                                @error('note')
+                                    <p style="color:#ef4444; font-size:.8rem; margin-top:.35rem">{{ $message }}</p>
+                                @enderror
+                            </div>
+                            <button type="submit" class="btn btn--primary btn--sm" style="width:100%">
+                                Send Message &#x2192;
+                            </button>
+                        </form>
                     </div>
-                @endif
+                </div>
 
                 {{-- Leave review for freelancer --}}
                 @if ($booking->canBeReviewedBy(auth()->user()))

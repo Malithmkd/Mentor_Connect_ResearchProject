@@ -134,7 +134,7 @@ class BookingController extends Controller
             : 'freelancer.bookings.show';
 
         return view($view, [
-            'booking' => $booking->load(['freelancer', 'mentor', 'gig', 'freelancerReview', 'mentorReview']),
+            'booking' => $booking->load(['freelancer', 'mentor', 'gig', 'freelancerReview', 'mentorReview', 'notes.user']),
         ]);
     }
 
@@ -296,26 +296,34 @@ class BookingController extends Controller
     }
 
     /**
-     * Mentor sends a reply note back to the freelancer on a booking.
+     * Add a note to the continuous booking thread.
      */
-    public function replyNote(MentorNoteRequest $request, Booking $booking): RedirectResponse
+    public function storeNote(\Illuminate\Http\Request $request, Booking $booking): RedirectResponse
     {
-        $data = $request->validated();
+        $this->authorize('view', $booking); // if they can view, they can add notes
 
-        $booking->update(['mentor_note' => $data['mentor_note']]);
+        $data = $request->validate([
+            'note' => 'required|string|max:2000',
+        ]);
 
-        // Notify the freelancer that the mentor replied with a note
+        $booking->notes()->create([
+            'user_id' => auth()->id(),
+            'note' => $data['note'],
+        ]);
+
+        // Notify the other party
+        $recipientId = auth()->id() === $booking->freelancer_id ? $booking->mentor_id : $booking->freelancer_id;
         Notification::create([
-            'user_id'           => $booking->freelancer_id,
+            'user_id'           => $recipientId,
             'type'              => 'booking_note_reply',
-            'title'             => 'Mentor Replied to Your Note',
-            'message'           => "{$booking->mentor->full_name} sent you a reply note for '{$booking->gig->title}'.",
-            'action_url'        => route('freelancer.bookings.show', $booking),
+            'title'             => 'New Session Note',
+            'message'           => auth()->user()->full_name . " sent a new note for '{$booking->gig->title}'.",
+            'action_url'        => route(auth()->user()->isMentor() ? 'freelancer.bookings.show' : 'mentor.bookings.show', $booking),
             'action_text'       => 'View Note',
             'related_booking_id'=> $booking->id,
         ]);
 
-        return redirect()->back()->with('success', 'Your reply note has been sent to the freelancer.');
+        return redirect()->back()->with('success', 'Note added successfully.');
     }
 
     /**

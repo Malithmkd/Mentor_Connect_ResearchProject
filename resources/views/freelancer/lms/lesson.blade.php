@@ -63,6 +63,28 @@
         </div>
         @endif
 
+        {{-- ── PDF Notes Download ── --}}
+        @if($lesson->hasPdf())
+        <div class="panel" style="margin-bottom:1.5rem;border-left:4px solid var(--color-primary)">
+            <div class="panel__body" style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap">
+                <div style="font-size:2rem;flex-shrink:0">📄</div>
+                <div style="flex:1;min-width:0">
+                    <p style="font-weight:700;color:var(--color-gray-900);margin:0 0 .15rem">PDF Notes</p>
+                    <p style="font-size:.8rem;color:var(--color-gray-500);margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
+                        {{ $lesson->pdfName() }}
+                    </p>
+                </div>
+                <a href="{{ $lesson->pdfUrl() }}"
+                   target="_blank"
+                   rel="noopener"
+                   class="btn btn--primary btn--sm"
+                   download>
+                    ⬇ Download PDF
+                </a>
+            </div>
+        </div>
+        @endif
+
         {{-- Complete Button + Navigation --}}
         <div class="panel">
             <div class="panel__body" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem">

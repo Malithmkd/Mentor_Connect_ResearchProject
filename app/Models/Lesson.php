@@ -22,6 +22,7 @@ class Lesson extends Model
         'title',
         'content',
         'video_url',
+        'pdf_path',
         'sort_order',
     ];
 
@@ -42,6 +43,28 @@ class Lesson extends Model
     }
 
     /* ─── Helpers ─── */
+
+    /** Whether this lesson has an attached PDF notes file */
+    public function hasPdf(): bool
+    {
+        return !empty($this->pdf_path);
+    }
+
+    /** Public URL to the PDF file */
+    public function pdfUrl(): ?string
+    {
+        return $this->pdf_path
+            ? asset('storage/' . $this->pdf_path)
+            : null;
+    }
+
+    /** Basename of the PDF for display */
+    public function pdfName(): ?string
+    {
+        return $this->pdf_path
+            ? basename($this->pdf_path)
+            : null;
+    }
 
     /**
      * Convert a standard YouTube or Vimeo URL to an embeddable iframe src.

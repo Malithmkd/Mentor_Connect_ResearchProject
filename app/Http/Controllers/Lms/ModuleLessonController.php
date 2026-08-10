@@ -8,12 +8,15 @@ use App\Models\CourseModule;
 use App\Models\Lesson;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * ModuleLessonController (Mentor only)
  * Handles CRUD for modules and lessons within a course builder.
  * All routes redirect back to the course edit view so the mentor
  * stays in the builder after every action.
+ *
+ * Lessons support an optional PDF attachment (max 10 MB) as notes.
  */
 class ModuleLessonController extends Controller
 {
@@ -65,6 +68,14 @@ class ModuleLessonController extends Controller
         abort_if(auth()->id() !== $module->course->mentor_id, 403);
 
         $course = $module->course;
+
+        // Delete any PDFs belonging to lessons in this module
+        foreach ($module->lessons as $lesson) {
+            if ($lesson->pdf_path) {
+                Storage::disk('public')->delete($lesson->pdf_path);
+            }
+        }
+
         $module->delete(); // cascades to lessons
 
         return redirect()
@@ -84,14 +95,21 @@ class ModuleLessonController extends Controller
             'title'     => ['required', 'string', 'max:255'],
             'content'   => ['nullable', 'string'],
             'video_url' => ['nullable', 'url', 'max:500'],
+            'pdf'       => ['nullable', 'file', 'mimes:pdf', 'max:10240'], // 10 MB
         ]);
 
         $maxOrder = $module->lessons()->max('sort_order') ?? -1;
+
+        $pdfPath = null;
+        if ($request->hasFile('pdf')) {
+            $pdfPath = $request->file('pdf')->store('lms-pdfs', 'public');
+        }
 
         $module->lessons()->create([
             'title'      => $validated['title'],
             'content'    => $validated['content'] ?? null,
             'video_url'  => $validated['video_url'] ?? null,
+            'pdf_path'   => $pdfPath,
             'sort_order' => $maxOrder + 1,
         ]);
 
@@ -105,12 +123,35 @@ class ModuleLessonController extends Controller
         abort_if(auth()->id() !== $lesson->module->course->mentor_id, 403);
 
         $validated = $request->validate([
-            'title'     => ['required', 'string', 'max:255'],
-            'content'   => ['nullable', 'string'],
-            'video_url' => ['nullable', 'url', 'max:500'],
+            'title'      => ['required', 'string', 'max:255'],
+            'content'    => ['nullable', 'string'],
+            'video_url'  => ['nullable', 'url', 'max:500'],
+            'pdf'        => ['nullable', 'file', 'mimes:pdf', 'max:10240'], // 10 MB
+            'remove_pdf' => ['nullable', 'boolean'],
         ]);
 
-        $lesson->update($validated);
+        $pdfPath = $lesson->pdf_path; // keep existing by default
+
+        if ($request->boolean('remove_pdf')) {
+            // Explicitly remove PDF
+            if ($pdfPath) {
+                Storage::disk('public')->delete($pdfPath);
+            }
+            $pdfPath = null;
+        } elseif ($request->hasFile('pdf')) {
+            // Replace with new PDF — delete old first
+            if ($pdfPath) {
+                Storage::disk('public')->delete($pdfPath);
+            }
+            $pdfPath = $request->file('pdf')->store('lms-pdfs', 'public');
+        }
+
+        $lesson->update([
+            'title'     => $validated['title'],
+            'content'   => $validated['content'] ?? null,
+            'video_url' => $validated['video_url'] ?? null,
+            'pdf_path'  => $pdfPath,
+        ]);
 
         return redirect()
             ->route('mentor.lms.courses.edit', $lesson->module->course)
@@ -122,10 +163,33 @@ class ModuleLessonController extends Controller
         abort_if(auth()->id() !== $lesson->module->course->mentor_id, 403);
 
         $course = $lesson->module->course;
+
+        // Delete PDF file if it exists
+        if ($lesson->pdf_path) {
+            Storage::disk('public')->delete($lesson->pdf_path);
+        }
+
         $lesson->delete();
 
         return redirect()
             ->route('mentor.lms.courses.edit', $course)
             ->with('success', 'Lesson deleted.');
+    }
+
+    /**
+     * Remove just the PDF from a lesson (keeping the rest intact).
+     */
+    public function destroyLessonPdf(Lesson $lesson): RedirectResponse
+    {
+        abort_if(auth()->id() !== $lesson->module->course->mentor_id, 403);
+
+        if ($lesson->pdf_path) {
+            Storage::disk('public')->delete($lesson->pdf_path);
+            $lesson->update(['pdf_path' => null]);
+        }
+
+        return redirect()
+            ->route('mentor.lms.courses.edit', $lesson->module->course)
+            ->with('success', 'PDF notes removed.');
     }
 }

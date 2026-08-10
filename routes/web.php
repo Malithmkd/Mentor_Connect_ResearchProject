@@ -222,6 +222,8 @@ Route::middleware('auth')->group(function () {
             ->name('lessons.update');
         Route::delete('lessons/{lesson}', [ModuleLessonController::class, 'destroyLesson'])
             ->name('lessons.destroy');
+        Route::delete('lessons/{lesson}/pdf', [ModuleLessonController::class, 'destroyLessonPdf'])
+            ->name('lessons.pdf.destroy');
     });
 });
 

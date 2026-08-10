@@ -17,13 +17,14 @@ use Illuminate\View\View;
 class FreelancerLmsController extends Controller
 {
     /**
-     * Dashboard: show relationships (all states) + enrolled courses.
+     * Dashboard: one panel per mentor, containing all their courses.
+     * Multiple relationships with the same mentor are merged into one section.
      */
     public function index(): View
     {
         $freelancerId = auth()->id();
 
-        // Accepted relationships — grouped by whether courses are enrolled yet
+        // All accepted relationships (may be multiple per mentor from different gigs)
         $acceptedRelationships = \App\Models\MentorshipRelationship::with(['mentor', 'booking', 'courses'])
             ->forFreelancer($freelancerId)
             ->accepted()
@@ -37,7 +38,7 @@ class FreelancerLmsController extends Controller
             ->latest()
             ->get();
 
-        // Enrolled courses (courses that have been published and enrolled)
+        // All enrollments (courses that have been published and enrolled)
         $enrollments = Enrollment::with([
                 'course.modules.lessons',
                 'course.relationship.mentor',
@@ -47,10 +48,47 @@ class FreelancerLmsController extends Controller
             ->latest()
             ->get();
 
+        // ── Group accepted relationships by mentor ──────────────────────────
+        // Each group = [ 'mentor' => User, 'relationships' => Collection, 'enrollments' => Collection ]
+        $mentorGroups = $acceptedRelationships
+            ->groupBy('mentor_id')
+            ->map(function ($rels) use ($enrollments) {
+                $mentor          = $rels->first()->mentor;
+                $relationshipIds = $rels->pluck('id');
+
+                // All enrollments whose course belongs to any of this mentor's relationships
+                $mentorEnrollments = $enrollments->filter(
+                    fn($e) => $relationshipIds->contains($e->course->relationship_id)
+                )->values();
+
+                return [
+                    'mentor'        => $mentor,
+                    'relationships' => $rels,          // for per-relationship actions (renew, badge)
+                    'enrollments'   => $mentorEnrollments,
+                ];
+            })
+            ->values(); // re-index to 0, 1, 2...
+
+        // ── Calculate overall progress ─────────────────────────────────────
+        $overallTotalLessons = 0;
+        $overallCompletedLessons = 0;
+
+        foreach ($enrollments as $enrollment) {
+            $overallTotalLessons += $enrollment->course->lessons()->count();
+            $overallCompletedLessons += $enrollment->lessonProgress()->whereNotNull('completed_at')->count();
+        }
+
+        $overallProgressPct = $overallTotalLessons > 0
+            ? (int) round(($overallCompletedLessons / $overallTotalLessons) * 100)
+            : 0;
+
         return view('freelancer.lms.index', compact(
-            'acceptedRelationships',
+            'mentorGroups',
             'pendingRelationships',
-            'enrollments'
+            'enrollments',
+            'overallTotalLessons',
+            'overallCompletedLessons',
+            'overallProgressPct'
         ));
     }
 

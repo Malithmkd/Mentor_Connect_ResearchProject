@@ -57,7 +57,7 @@
             }
         @endphp
 
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;margin-bottom:2rem">
+        <div class="lms-kpi-grid" style="margin-bottom:2rem">
             <div class="panel" style="text-align:center">
                 <div class="panel__body">
                     <p style="font-size:2.5rem;font-weight:800;color:var(--color-primary)">{{ $pct }}%</p>
@@ -79,7 +79,7 @@
         </div>
 
         {{-- ── Row 1: Doughnut + Bar ──────────────────────────────────── --}}
-        <div style="display:grid;grid-template-columns:1fr 2fr;gap:1.5rem;margin-bottom:1.5rem;align-items:start">
+        <div class="lms-chart-grid" style="margin-bottom:1.5rem">
             <div class="panel">
                 <div class="panel__header"><h2 class="panel__title">Overall Completion</h2></div>
                 <div class="panel__body" style="display:flex;flex-direction:column;align-items:center;gap:1rem">
@@ -238,3 +238,35 @@
     </div>
 </section>
 @endsection
+
+@push('styles')
+<style>
+/* ── Responsive Grids ── */
+.lms-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+}
+.lms-chart-grid {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 1.5rem;
+    align-items: start;
+}
+
+@media (max-width: 860px) {
+    .lms-kpi-grid {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    }
+    .lms-chart-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .lms-kpi-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+@endpush

@@ -21,6 +21,7 @@ class StoreBookingRequest extends FormRequest
             'gig_id' => ['required', 'integer', 'exists:gigs,id'],
             'freelancer_note' => ['nullable', 'string', 'max:1000'],
             'proposed_date' => ['nullable', 'date', 'after:today'],
+            'proposed_time' => ['nullable', 'date_format:H:i'],
         ];
     }
 
@@ -29,6 +30,7 @@ class StoreBookingRequest extends FormRequest
         return [
             'gig_id.exists' => 'The selected gig does not exist.',
             'proposed_date.after' => 'Proposed date must be in the future.',
+            'proposed_time.date_format' => 'Proposed time must be a valid time (HH:MM).',
         ];
     }
 }

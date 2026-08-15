@@ -79,7 +79,7 @@ class Gig extends Model
 
     public function getFormattedPriceAttribute(): string
     {
-        return '$' . number_format($this->price, 2);
+        return 'Rs ' . number_format($this->price, 2);
     }
 
     public function getFormattedDurationAttribute(): string

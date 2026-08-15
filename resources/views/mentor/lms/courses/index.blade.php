@@ -11,7 +11,7 @@
                 <p class="dashboard__subtitle">
                     Long-term mentorship &middot; {{ ucfirst($relationship->payment_type ?? 'custom') }} plan
                     @if($relationship->payment_amount)
-                        &middot; ${{ number_format($relationship->payment_amount, 2) }}
+                        &middot; Rs {{ number_format($relationship->payment_amount, 2) }}
                     @endif
                 </p>
             </div>

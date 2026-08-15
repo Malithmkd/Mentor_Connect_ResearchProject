@@ -124,7 +124,7 @@
                             <div style="font-size:11px;color:var(--adm-text-400);margin-top:4px;display:flex;gap:8px;flex-wrap:wrap;">
                                 @if ($mp->company)  <span>🏢 {{ $mp->company }}</span>  @endif
                                 @if ($mp->years_experience) <span>💼 {{ $mp->years_experience }}yr exp</span> @endif
-                                @if ($mp->hourly_rate) <span>💵 ${{ number_format($mp->hourly_rate,2) }}/h</span> @endif
+                                @if ($mp->hourly_rate) <span>💰 Rs {{ number_format($mp->hourly_rate,2) }}/h</span> @endif
                             </div>
                         @endif
                     </td>

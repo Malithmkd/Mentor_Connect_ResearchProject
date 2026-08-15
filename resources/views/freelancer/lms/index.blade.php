@@ -161,7 +161,7 @@
                         <p style="font-size:.8rem;color:var(--color-gray-500)">
                             Request sent {{ $rel->requested_at->diffForHumans() }}
                             @if($rel->payment_amount)
-                                &middot; ${{ number_format($rel->payment_amount, 2) }} / {{ $rel->payment_type }}
+                                &middot; Rs {{ number_format($rel->payment_amount, 2) }} / {{ $rel->payment_type }}
                             @endif
                             @if($rel->duration_months)
                                 &middot; {{ $rel->duration_months }} month{{ $rel->duration_months > 1 ? 's' : '' }} requested

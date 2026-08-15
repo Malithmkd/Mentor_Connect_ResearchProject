@@ -93,10 +93,21 @@ class BookingPolicy
 
     /**
      * Only the mentor can mark as completed.
+     * Rule 2: Can only complete after the session end time (proposed_time + duration) has passed.
      */
     public function complete(User $user, Booking $booking): bool
     {
-        return ($user->id === $booking->mentor_id || $user->isAdmin())
-            && $booking->status === BookingStatus::SCHEDULED;
+        if (!($user->id === $booking->mentor_id || $user->isAdmin())) {
+            return false;
+        }
+
+        if ($booking->status !== BookingStatus::SCHEDULED) {
+            return false;
+        }
+
+        // Ensure the session end time has passed (loads gig relation if not already loaded)
+        $booking->loadMissing('gig');
+
+        return $booking->canBeMarkedComplete();
     }
 }

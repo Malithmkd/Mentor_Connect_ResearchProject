@@ -194,7 +194,7 @@
                         @if ($mp->hourly_rate)
                             <div class="detail-list__row">
                                 <dt>Hourly Rate</dt>
-                                <dd>${{ number_format($mp->hourly_rate, 2) }}</dd>
+                                <dd>Rs {{ number_format($mp->hourly_rate, 2) }}</dd>
                             </div>
                         @endif
                         <div class="detail-list__row">

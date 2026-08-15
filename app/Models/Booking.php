@@ -40,6 +40,7 @@ class Booking extends Model
         'price_paid',
         'meeting_link',
         'meeting_provider',
+        'proposed_time',
     ];
 
     protected $casts = [
@@ -51,6 +52,7 @@ class Booking extends Model
         'completed_at' => 'datetime',
         'cancelled_at' => 'datetime',
         'proposed_date' => 'date',
+        // proposed_time is stored as a plain string (HH:MM) — Carbon handles it below
     ];
 
     protected static function boot(): void
@@ -129,7 +131,7 @@ class Booking extends Model
         match ($newStatus) {
             BookingStatus::REQUESTED => $this->requested_at = now(),
             BookingStatus::ACCEPTED, BookingStatus::REJECTED => $this->responded_at = now(),
-            BookingStatus::SCHEDULED => $this->scheduled_at = now(),
+            BookingStatus::SCHEDULED => $this->scheduled_at = $this->sessionStartDateTime() ?? now(),
             BookingStatus::COMPLETED => $this->completed_at = now(),
             BookingStatus::CANCELLED => $this->cancelled_at = now(),
             default => null,
@@ -151,6 +153,69 @@ class Booking extends Model
         return $this->status->canBeReviewed();
     }
 
+    /**
+     * Returns a Carbon datetime representing when the session ends:
+     * proposed_date + proposed_time + gig.duration_minutes.
+     * Returns null if either proposed_date or proposed_time is missing.
+     */
+    public function sessionEndDateTime(): ?\Carbon\Carbon
+    {
+        if (!$this->proposed_date || !$this->proposed_time) {
+            return null;
+        }
+
+        $start = \Carbon\Carbon::parse(
+            $this->proposed_date->format('Y-m-d') . ' ' . $this->proposed_time
+        );
+
+        $durationMinutes = $this->gig?->duration_minutes ?? 0;
+
+        return $start->addMinutes($durationMinutes);
+    }
+
+    /**
+     * Returns the session start Carbon datetime, or null if date/time not provided.
+     */
+    public function sessionStartDateTime(): ?\Carbon\Carbon
+    {
+        if (!$this->proposed_date || !$this->proposed_time) {
+            return null;
+        }
+
+        return \Carbon\Carbon::parse(
+            $this->proposed_date->format('Y-m-d') . ' ' . $this->proposed_time
+        );
+    }
+
+    /**
+     * A booking request has "expired" for acceptance if the proposed
+     * start date+time has already passed.
+     * Bookings with no proposed_time are never considered expired.
+     */
+    public function isAcceptanceExpired(): bool
+    {
+        $start = $this->sessionStartDateTime();
+
+        return $start !== null && $start->isPast();
+    }
+
+    /**
+     * The mentor can only mark a session as completed once its
+     * end time (start + duration) has passed.
+     * If no time was set, there is no time restriction.
+     */
+    public function canBeMarkedComplete(): bool
+    {
+        $end = $this->sessionEndDateTime();
+
+        // No time restriction for bookings without proposed_time
+        if ($end === null) {
+            return true;
+        }
+
+        return $end->isPast();
+    }
+
     public function canBeReviewedBy(?User $user = null): bool
     {
         if (!$user || !$this->status->canBeReviewed()) {
@@ -168,7 +233,7 @@ class Booking extends Model
 
     public function getFormattedPriceAttribute(): string
     {
-        return '$' . number_format($this->price_paid, 2);
+        return 'Rs ' . number_format($this->price_paid, 2);
     }
 
     /* ─── Scopes ─── */

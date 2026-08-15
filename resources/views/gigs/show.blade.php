@@ -136,7 +136,17 @@
                                            min="{{ now()->addDay()->format('Y-m-d') }}"
                                            value="{{ old('proposed_date') }}"
                                            placeholder="Select a preferred date">
-                                    <span class="form__hint">Let the mentor know your preferred date. They may schedule a different time.</span>
+                                    <span class="form__hint">Let the mentor know your preferred date.</span>
+                                </div>
+                                <div class="form__group">
+                                    <label class="form__label">Preferred Time (optional)</label>
+                                    <input type="time" name="proposed_time" class="form__input"
+                                           value="{{ old('proposed_time') }}"
+                                           placeholder="e.g. 18:00">
+                                    <span class="form__hint">Specify the time you'd like the session to start. The mentor will only be able to accept if this time hasn't passed.</span>
+                                    @error('proposed_time')
+                                        <span class="form__error">{{ $message }}</span>
+                                    @enderror
                                 </div>
                                 <div class="form__group">
                                     <label class="form__label">Note for mentor (optional)</label>

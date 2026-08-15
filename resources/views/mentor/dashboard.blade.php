@@ -22,7 +22,7 @@
                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2v16M2 10h16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
                 </div>
                 <div class="stat-card__info">
-                    <span class="stat-card__value">${{ number_format($stats['earnings'], 2) }}</span>
+                    <span class="stat-card__value">Rs {{ number_format($stats['earnings'], 2) }}</span>
                     <span class="stat-card__label">Total Earnings</span>
                 </div>
             </div>

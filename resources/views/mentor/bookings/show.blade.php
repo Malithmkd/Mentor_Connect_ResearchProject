@@ -63,9 +63,17 @@
                     <div class="session-metric-pill">
                         <span class="session-metric-pill__label">📅 Date</span>
                         <span class="session-metric-pill__value">
-                            {{ $booking->scheduled_at ? $booking->scheduled_at->format('M d, Y') : ($booking->proposed_date ? $booking->proposed_date->format('M d, Y') : 'Pending') }}
+                            {{ $booking->proposed_date ? $booking->proposed_date->format('M d, Y') : 'Pending' }}
                         </span>
                     </div>
+                    @if ($booking->proposed_time)
+                        <div class="session-metric-pill">
+                            <span class="session-metric-pill__label">⏰ Time</span>
+                            <span class="session-metric-pill__value">
+                                {{ \Carbon\Carbon::parse($booking->proposed_time)->format('g:i A') }}
+                            </span>
+                        </div>
+                    @endif
                 </div>
 
                 {{-- Details Info Grid --}}
@@ -79,18 +87,25 @@
                         </span>
                     </div>
 
-                    @if ($booking->scheduled_at)
+                    {{-- Always show the freelancer's requested date & time — mentor cannot change this --}}
+                    @if ($booking->proposed_date)
+                        <div class="session-info-item">
+                            <span class="session-info-item__label">
+                                {{ in_array($booking->status->value, ['scheduled','completed','reviewed']) ? 'Session Date & Time' : 'Requested Date & Time' }}
+                            </span>
+                            <span class="session-info-item__value">
+                                📅 {{ $booking->proposed_date->format('D, M d Y') }}
+                                @if ($booking->proposed_time)
+                                    &nbsp;⏰ {{ \Carbon\Carbon::parse($booking->proposed_time)->format('g:i A') }}
+                                @endif
+                            </span>
+                        </div>
+                    @elseif ($booking->scheduled_at)
+                        {{-- Fallback for legacy bookings without proposed_date --}}
                         <div class="session-info-item">
                             <span class="session-info-item__label">Confirmed Schedule</span>
                             <span class="session-info-item__value">
                                 🕒 {{ $booking->scheduled_at->format('D, M d Y \a\t g:i A') }}
-                            </span>
-                        </div>
-                    @elseif ($booking->proposed_date)
-                        <div class="session-info-item">
-                            <span class="session-info-item__label">Requested Date</span>
-                            <span class="session-info-item__value">
-                                📅 {{ $booking->proposed_date->format('D, M d Y') }}
                             </span>
                         </div>
                     @endif
@@ -146,29 +161,72 @@
             <div>
                 {{-- Accept / Decline --}}
                 @if ($booking->status->value === 'requested')
+                    @php
+                        $booking->loadMissing('gig');
+                        $acceptanceExpired = $booking->isAcceptanceExpired();
+                    @endphp
                     <div class="panel" style="margin-bottom:1.5rem">
                         <div class="panel__header"><h2 class="panel__title">Respond to Request</h2></div>
-                        <div class="panel__body" style="display:flex;gap:.75rem">
-                            <form method="POST" action="{{ route('bookings.status', $booking) }}" style="flex:1">
-                                @csrf @method('PATCH')
-                                <input type="hidden" name="status" value="accepted">
-                                <button type="submit" class="btn btn--success btn--sm" style="width:100%">Accept</button>
-                            </form>
-                            <form method="POST" action="{{ route('bookings.status', $booking) }}" style="flex:1"
-                                  onsubmit="return confirm('Decline this request?')">
-                                @csrf @method('PATCH')
-                                <input type="hidden" name="status" value="rejected">
-                                <button type="submit" class="btn btn--error btn--sm" style="width:100%">Decline</button>
-                            </form>
-                        </div>
+                        @if ($acceptanceExpired)
+                            <div class="panel__body">
+                                <div style="display:flex;align-items:center;gap:.6rem;padding:.75rem 1rem;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:8px;">
+                                    <span style="font-size:1.2rem">⚠️</span>
+                                    <div>
+                                        <p style="font-weight:600;color:#ef4444;margin:0 0 .2rem">Session Time Expired</p>
+                                        <p style="font-size:.82rem;color:var(--color-text-muted);margin:0">
+                                            The requested session time ({{ $booking->proposed_date->format('M d, Y') }}
+                                            @if($booking->proposed_time)
+                                                at {{ \Carbon\Carbon::parse($booking->proposed_time)->format('g:i A') }}
+                                            @endif
+                                            ) has already passed. This request can no longer be accepted.
+                                        </p>
+                                    </div>
+                                </div>
+                                {{-- Only allow decline --}}
+                                <form method="POST" action="{{ route('bookings.status', $booking) }}" style="margin-top:.75rem"
+                                      onsubmit="return confirm('Decline this request?')">
+                                    @csrf @method('PATCH')
+                                    <input type="hidden" name="status" value="rejected">
+                                    <button type="submit" class="btn btn--error btn--sm" style="width:100%">Decline</button>
+                                </form>
+                            </div>
+                        @else
+                            <div class="panel__body" style="display:flex;gap:.75rem">
+                                <form method="POST" action="{{ route('bookings.status', $booking) }}" style="flex:1">
+                                    @csrf @method('PATCH')
+                                    <input type="hidden" name="status" value="accepted">
+                                    <button type="submit" class="btn btn--success btn--sm" style="width:100%">Accept</button>
+                                </form>
+                                <form method="POST" action="{{ route('bookings.status', $booking) }}" style="flex:1"
+                                      onsubmit="return confirm('Decline this request?')">
+                                    @csrf @method('PATCH')
+                                    <input type="hidden" name="status" value="rejected">
+                                    <button type="submit" class="btn btn--error btn--sm" style="width:100%">Decline</button>
+                                </form>
+                            </div>
+                        @endif
                     </div>
                 @endif
 
                 {{-- Schedule session --}}
                 @if ($booking->status->value === 'accepted')
                     <div class="panel" style="margin-bottom:1.5rem">
-                        <div class="panel__header"><h2 class="panel__title">Schedule Session</h2></div>
+                        <div class="panel__header"><h2 class="panel__title">Confirm &amp; Schedule Session</h2></div>
                         <div class="panel__body">
+                            {{-- Show the locked session date/time from the freelancer --}}
+                            @if ($booking->proposed_date)
+                                <div style="display:flex;align-items:center;gap:.5rem;padding:.6rem .85rem;background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.2);border-radius:8px;margin-bottom:1rem;font-size:.85rem;">
+                                    <span>📅</span>
+                                    <span>
+                                        <strong>Session time:</strong>
+                                        {{ $booking->proposed_date->format('D, M d Y') }}
+                                        @if ($booking->proposed_time)
+                                            at {{ \Carbon\Carbon::parse($booking->proposed_time)->format('g:i A') }}
+                                        @endif
+                                        &nbsp;<span style="color:var(--color-text-muted);">(set by freelancer — cannot be changed)</span>
+                                    </span>
+                                </div>
+                            @endif
                             <form method="POST" action="{{ route('bookings.status', $booking) }}">
                                 @csrf @method('PATCH')
                                 <input type="hidden" name="status" value="scheduled">
@@ -185,15 +243,34 @@
 
                 {{-- Mark as completed --}}
                 @if ($booking->status->value === 'scheduled')
+                    @php
+                        $booking->loadMissing('gig');
+                        $sessionEnd = $booking->sessionEndDateTime();
+                        $canComplete = $booking->canBeMarkedComplete();
+                    @endphp
                     <div class="panel" style="margin-bottom:1.5rem">
                         <div class="panel__header"><h2 class="panel__title">Session Complete?</h2></div>
                         <div class="panel__body">
-                            <form method="POST" action="{{ route('bookings.status', $booking) }}"
-                                  onsubmit="return confirm('Mark this session as completed?')">
-                                @csrf @method('PATCH')
-                                <input type="hidden" name="status" value="completed">
-                                <button type="submit" class="btn btn--success btn--sm" style="width:100%">Mark as Completed</button>
-                            </form>
+                            @if ($canComplete)
+                                <form method="POST" action="{{ route('bookings.status', $booking) }}"
+                                      onsubmit="return confirm('Mark this session as completed?')">
+                                    @csrf @method('PATCH')
+                                    <input type="hidden" name="status" value="completed">
+                                    <button type="submit" class="btn btn--success btn--sm" style="width:100%">Mark as Completed</button>
+                                </form>
+                            @else
+                                <div style="display:flex;align-items:center;gap:.6rem;padding:.75rem 1rem;background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.25);border-radius:8px;">
+                                    <span style="font-size:1.2rem">⏳</span>
+                                    <div>
+                                        <p style="font-weight:600;color:var(--color-primary);margin:0 0 .2rem">Session Not Finished Yet</p>
+                                        <p style="font-size:.82rem;color:var(--color-text-muted);margin:0">
+                                            You can mark this session as completed after
+                                            <strong>{{ $sessionEnd->format('D, M d Y \a\t g:i A') }}</strong>.
+                                        </p>
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn--success btn--sm" style="width:100%;margin-top:.75rem;opacity:.45;cursor:not-allowed" disabled>Mark as Completed</button>
+                            @endif
                         </div>
                     </div>
                 @endif
@@ -361,7 +438,7 @@
                                     <div class="lt-card__info-item">
                                         <span class="lt-card__info-label">💰 Rate / Amount</span>
                                         <span class="lt-card__info-val">
-                                            {{ $rel->payment_amount ? '$' . number_format($rel->payment_amount, 2) : 'To discuss' }}
+                                            {{ $rel->payment_amount ? 'Rs ' . number_format($rel->payment_amount, 2) : 'To discuss' }}
                                         </span>
                                     </div>
                                     @if($rel->duration_months)

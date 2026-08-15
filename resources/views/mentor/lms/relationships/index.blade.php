@@ -31,7 +31,7 @@
                                 <p class="lms-rel-card__meta">
                                     Requested {{ $rel->requested_at->diffForHumans() }}
                                     @if($rel->payment_amount)
-                                        &middot; <strong>${{ number_format($rel->payment_amount, 2) }}</strong> / {{ $rel->payment_type }}
+                                        &middot; <strong>Rs {{ number_format($rel->payment_amount, 2) }}</strong> / {{ $rel->payment_type }}
                                     @endif
                                 </p>
                                 @if($rel->payment_notes)

@@ -47,6 +47,7 @@ class BookingController extends Controller
             'price_paid' => $gig->price,
             'freelancer_note' => $data['freelancer_note'] ?? null,
             'proposed_date' => !empty($data['proposed_date']) ? $data['proposed_date'] : null,
+            'proposed_time' => !empty($data['proposed_time']) ? $data['proposed_time'] : null,
         ]);
 
         // Increment gig bookings count
@@ -160,6 +161,17 @@ class BookingController extends Controller
                 $this->authorize('cancel', $booking),
             default => abort(403),
         };
+
+        // Rule 1: Cannot accept a session if the proposed date/time has already passed
+        if ($newStatus === BookingStatus::ACCEPTED) {
+            $booking->loadMissing('gig');
+            if ($booking->isAcceptanceExpired()) {
+                return back()->with(
+                    'error',
+                    'This session cannot be accepted because the requested date and time have already passed.'
+                );
+            }
+        }
 
         // Apply state machine transition
         if (!$booking->transitionTo($newStatus, $note)) {

@@ -91,6 +91,9 @@
                             <span class="session-info-item__label">Proposed Date</span>
                             <span class="session-info-item__value">
                                 📅 {{ $booking->proposed_date->format('D, M d Y') }}
+                                @if ($booking->proposed_time)
+                                    &nbsp;⏰ {{ \Carbon\Carbon::parse($booking->proposed_time)->format('g:i A') }}
+                                @endif
                             </span>
                         </div>
                     @endif
@@ -326,7 +329,7 @@
                                     <div class="lt-card__info-item">
                                         <span class="lt-card__info-label">💰 Rate / Amount</span>
                                         <span class="lt-card__info-val">
-                                            {{ $booking->mentorshipRelationship->payment_amount ? '$' . number_format($booking->mentorshipRelationship->payment_amount, 2) : 'Custom' }}
+                                            {{ $booking->mentorshipRelationship->payment_amount ? 'Rs ' . number_format($booking->mentorshipRelationship->payment_amount, 2) : 'Custom' }}
                                         </span>
                                     </div>
                                     @if($booking->mentorshipRelationship->duration_months)

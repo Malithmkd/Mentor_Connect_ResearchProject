@@ -183,8 +183,9 @@
                             <div class="panel__body">
                                 <div class="gig-list">
                                     @foreach ($user->gigs as $gig)
-                                        <a href="{{ route('gigs.show', $gig->slug) }}" class="gig-list__item">
-                                            <div class="gig-list__info">
+                                        <a href="{{ route('gigs.show', $gig->slug) }}" class="gig-list__item" style="display:flex; align-items:center; gap:var(--space-3);">
+                                            <img src="{{ $gig->cover_image_url }}" alt="{{ $gig->title }}" class="gig-thumb" style="width:52px; height:52px; border-radius:8px; object-fit:cover; flex-shrink:0;">
+                                            <div class="gig-list__info" style="flex:1;">
                                                 <p class="gig-list__title">{{ $gig->title }}</p>
                                                 <p class="gig-list__subtitle">{{ $gig->formatted_duration }} &middot; {{ ucfirst($gig->experience_level) }}</p>
                                             </div>

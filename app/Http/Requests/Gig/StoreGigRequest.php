@@ -24,6 +24,7 @@ class StoreGigRequest extends FormRequest
             'description' => ['required', 'string', 'max:5000'],
             'what_to_expect' => ['nullable', 'string', 'max:2000'],
             'prerequisites' => ['nullable', 'string', 'max:2000'],
+            'cover_image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
             'delivery_format' => ['required', 'string', 'in:video_call,voice_call,chat,async'],
             'experience_level' => ['required', 'string', 'in:beginner,intermediate,advanced,all_levels'],
             'duration_minutes' => ['required', 'integer', 'min:15', 'max:480'],

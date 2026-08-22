@@ -27,6 +27,7 @@ class Gig extends Model
         'description',
         'what_to_expect',
         'prerequisites',
+        'cover_image',
         'delivery_format',
         'experience_level',
         'duration_minutes',
@@ -87,6 +88,68 @@ class Gig extends Model
         return $this->duration_minutes >= 60
             ? floor($this->duration_minutes / 60) . 'h ' . ($this->duration_minutes % 60) . 'm'
             : $this->duration_minutes . ' min';
+    }
+
+    /**
+     * Returns the cover image URL.
+     * If no image was uploaded, picks a smart default based on keywords
+     * found in the gig title or description.
+     */
+    public function getCoverImageUrlAttribute(): string
+    {
+        if ($this->cover_image) {
+            return asset('storage/' . $this->cover_image);
+        }
+
+        // Keyword → default image mapping (checks title, description, and attached skills)
+        $skillNames = $this->relationLoaded('skills') ? $this->skills->pluck('name')->implode(' ') : '';
+        $haystack = strtolower($this->title . ' ' . ($this->description ?? '') . ' ' . $skillNames);
+
+        $map = [
+            'machine learning' => 'ml',
+            'deep learning'    => 'ml',
+            'neural'           => 'ml',
+            'nlp'              => 'ml',
+            'artificial intel' => 'ml',
+            '\bai\b'           => 'ml',
+            'data science'     => 'ml',
+            'software engine'  => 'se',
+            'backend'          => 'se',
+            'frontend'         => 'se',
+            'full.?stack'      => 'se',
+            'web dev'          => 'se',
+            'laravel'          => 'se',
+            'react'            => 'se',
+            'python'           => 'se',
+            'java'             => 'se',
+            'system design'    => 'se',
+            'api'              => 'se',
+            'ui.?ux'           => 'design',
+            'product design'   => 'design',
+            'figma'            => 'design',
+            'design'           => 'design',
+            'cloud'            => 'cloud',
+            'devops'           => 'cloud',
+            'docker'           => 'cloud',
+            'kubernetes'       => 'cloud',
+            'aws'              => 'cloud',
+            'azure'            => 'cloud',
+            'gcp'              => 'cloud',
+            'career'           => 'career',
+            'interview'        => 'career',
+            'resume'           => 'career',
+            'leadership'       => 'career',
+            'management'       => 'career',
+        ];
+
+        foreach ($map as $pattern => $category) {
+            if (preg_match('/' . $pattern . '/i', $haystack)) {
+                return asset('images/gig-defaults/' . $category . '.jpg');
+            }
+        }
+
+        // Ultimate fallback — SE is a safe generic tech image
+        return asset('images/gig-defaults/se.jpg');
     }
 
     /* ─── Scopes ─── */

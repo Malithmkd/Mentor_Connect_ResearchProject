@@ -1591,6 +1591,58 @@ ol {
     height: 420px;
 }
 
+/* ── Hero illustration image ── */
+.hero__illustration {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 0;
+}
+
+.hero__illustration-img {
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+    object-position: center top;
+    border-radius: 28px;
+    box-shadow:
+        0 0 0 6px rgba(255,255,255,0.6),
+        0 24px 60px rgba(79,70,229,0.22),
+        0 8px 20px rgba(79,70,229,0.12);
+    animation: heroImgFloat 7s ease-in-out infinite;
+    transform-origin: center bottom;
+}
+
+@keyframes heroImgFloat {
+    0%, 100% { transform: translateY(0px) scale(1); }
+    50%       { transform: translateY(-8px) scale(1.01); }
+}
+
+.hero__illustration-glow {
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 70%;
+    height: 60px;
+    background: radial-gradient(ellipse, rgba(79,70,229,0.30) 0%, transparent 70%);
+    filter: blur(16px);
+    z-index: -1;
+    animation: heroImgFloat 7s ease-in-out infinite;
+}
+
+/* Keep cards on top of the illustration */
+.hero__card { z-index: 2; }
+
+[data-theme="dark"] .hero__illustration-img {
+    box-shadow:
+        0 0 0 6px rgba(99,102,241,0.25),
+        0 24px 60px rgba(0,0,0,0.45),
+        0 8px 20px rgba(79,70,229,0.2);
+}
+
 .hero__card {
     position: absolute;
     background: rgba(255, 255, 255, 0.9);
@@ -1875,15 +1927,87 @@ ol {
 
 .trust__logo {
     font-size: var(--text-lg);
-    font-weight: 700;
-    color: var(--color-gray-300);
+    font-weight: 800;
     letter-spacing: -0.02em;
-    transition: color var(--transition-fast);
+    transition: transform 0.2s ease, filter 0.2s ease, opacity 0.2s ease;
+    opacity: 0.72;
+    cursor: default;
+    display: inline-block;
 }
 
 .trust__logo:hover {
-    color: var(--color-gray-400);
+    opacity: 1;
+    transform: translateY(-2px) scale(1.1);
 }
+
+/* ── Brand-specific colours ── */
+
+/* Google: iconic 4-colour gradient wordmark */
+.trust__logo--google {
+    background: linear-gradient(90deg, #4285F4 25%, #EA4335 25% 50%, #FBBC04 50% 75%, #34A853 75%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+.trust__logo--google:hover {
+    filter: drop-shadow(0 3px 8px rgba(66,133,244,0.5));
+}
+
+/* Stripe: vivid indigo-violet */
+.trust__logo--stripe {
+    color: #635BFF;
+}
+.trust__logo--stripe:hover {
+    filter: drop-shadow(0 3px 10px rgba(99,91,255,0.55));
+}
+
+/* Airbnb: signature coral-red */
+.trust__logo--airbnb {
+    color: #FF5A5F;
+}
+.trust__logo--airbnb:hover {
+    filter: drop-shadow(0 3px 10px rgba(255,90,95,0.55));
+}
+
+/* Spotify: vivid green */
+.trust__logo--spotify {
+    color: #1DB954;
+}
+.trust__logo--spotify:hover {
+    filter: drop-shadow(0 3px 10px rgba(29,185,84,0.55));
+}
+
+/* Shopify: earthy green */
+.trust__logo--shopify {
+    color: #96BF48;
+}
+.trust__logo--shopify:hover {
+    filter: drop-shadow(0 3px 10px rgba(150,191,72,0.55));
+}
+
+/* Notion: deep charcoal (white in dark mode) */
+.trust__logo--notion {
+    color: #1a1a1a;
+}
+[data-theme="dark"] .trust__logo--notion {
+    color: #e8e8e8;
+}
+.trust__logo--notion:hover {
+    filter: drop-shadow(0 3px 8px rgba(0,0,0,0.3));
+}
+
+/* Meta: Facebook blue */
+.trust__logo--meta {
+    color: #0082FB;
+}
+.trust__logo--meta:hover {
+    filter: drop-shadow(0 3px 10px rgba(0,130,251,0.55));
+}
+
+/* Dark mode: slightly more visible */
+[data-theme="dark"] .trust__logo { opacity: 0.82; }
+[data-theme="dark"] .trust__logo:hover { opacity: 1; }
+
 
 /* ═══ Featured Section ═══ */
 .featured {
@@ -1968,6 +2092,39 @@ ol {
     border-color: var(--color-gray-200);
     box-shadow: var(--shadow-md);
     transform: translateY(-2px);
+}
+
+.gig-card__cover {
+    width: calc(100% + var(--space-5) * 2);
+    height: 155px;
+    margin: calc(var(--space-5) * -1) calc(var(--space-5) * -1) var(--space-4);
+    border-top-left-radius: var(--radius-xl);
+    border-top-right-radius: var(--radius-xl);
+    overflow: hidden;
+    position: relative;
+    background: var(--color-gray-100);
+}
+
+.gig-card__cover-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    transition: transform 0.3s ease;
+    display: block;
+}
+
+.gig-card:hover .gig-card__cover-img {
+    transform: scale(1.05);
+}
+
+.gig-thumb {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-md);
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 1px solid var(--color-gray-200);
 }
 
 .gig-card__header {
@@ -2324,6 +2481,24 @@ ol {
     .gig-detail__grid {
         grid-template-columns: 2fr 1fr;
     }
+}
+
+.gig-detail__cover {
+    width: 100%;
+    height: 240px;
+    border-radius: var(--radius-2xl);
+    overflow: hidden;
+    margin-bottom: var(--space-6);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    background: var(--color-gray-100);
+}
+
+.gig-detail__cover-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
 }
 
 .gig-detail__title {
@@ -4320,6 +4495,195 @@ ol {
 [data-theme="dark"] .session-note-bubble__role { background: #374151; color: #9ca3af; }
 [data-theme="dark"] .session-note-bubble__text { color: #e2e8f0; }
 [data-theme="dark"] .session-note-bubble__awaiting { background: #1f2937; border-color: #374151; color: #6b7280; }
+
+/* ═══ Add Note Compose Box Styling ═══ */
+.note-compose-card {
+    background: var(--color-white);
+    border: 1px solid var(--color-gray-200);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+    margin-bottom: 1.5rem;
+    transition: box-shadow 0.2s ease;
+}
+
+.note-compose-card:hover {
+    box-shadow: 0 6px 20px rgba(79, 70, 229, 0.08);
+}
+
+.note-compose-card__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.25rem;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-bottom: 1px solid var(--color-gray-100);
+}
+
+.note-compose-card__title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--color-gray-900);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+}
+
+.note-compose-card__badge {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #4f46e5;
+    background: #eef2ff;
+    padding: 0.15rem 0.6rem;
+    border-radius: 999px;
+    letter-spacing: 0.02em;
+}
+
+.note-compose-card__body {
+    padding: 1.25rem;
+}
+
+.note-compose-card__desc {
+    font-size: 0.85rem;
+    color: var(--color-gray-500);
+    margin: 0 0 1rem 0;
+    line-height: 1.5;
+}
+
+.note-compose-box {
+    background: #f8fafc;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 0.85rem 1rem;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.note-compose-box:focus-within {
+    background: #ffffff;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15), 0 4px 14px rgba(99, 102, 241, 0.06);
+}
+
+.note-compose-box__textarea {
+    width: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-family: inherit;
+    font-size: 0.92rem;
+    line-height: 1.6;
+    color: var(--color-gray-900);
+    resize: vertical;
+    min-height: 85px;
+    padding: 0;
+    margin-bottom: 0.5rem;
+}
+
+.note-compose-box__textarea::placeholder {
+    color: #94a3b8;
+    font-size: 0.9rem;
+}
+
+.note-compose-box__toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 0.65rem;
+    border-top: 1px dashed #e2e8f0;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.note-compose-box__hint {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    user-select: none;
+}
+
+.note-compose-box__btn {
+    background: linear-gradient(135deg, #4f46e5, #6366f1);
+    color: #ffffff;
+    border: none;
+    padding: 0.5rem 1.15rem;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+    transition: all 0.2s ease;
+    margin-left: auto;
+}
+
+.note-compose-box__btn:hover {
+    background: linear-gradient(135deg, #4338ca, #4f46e5);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(79, 70, 229, 0.35);
+}
+
+.note-compose-box__btn:active {
+    transform: translateY(0);
+}
+
+/* Dark mode for note compose card */
+[data-theme="dark"] .note-compose-card {
+    background: #1e293b;
+    border-color: #334155;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .note-compose-card__header {
+    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+    border-color: #334155;
+}
+
+[data-theme="dark"] .note-compose-card__title {
+    color: #f1f5f9;
+}
+
+[data-theme="dark"] .note-compose-card__badge {
+    background: #312e81;
+    color: #a5b4fc;
+}
+
+[data-theme="dark"] .note-compose-card__desc {
+    color: #94a3b8;
+}
+
+[data-theme="dark"] .note-compose-box {
+    background: #0f172a;
+    border-color: #334155;
+}
+
+[data-theme="dark"] .note-compose-box:focus-within {
+    background: #1e293b;
+    border-color: #818cf8;
+    box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.2), 0 4px 14px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .note-compose-box__textarea {
+    color: #f1f5f9;
+}
+
+[data-theme="dark"] .note-compose-box__textarea::placeholder {
+    color: #64748b;
+}
+
+[data-theme="dark"] .note-compose-box__toolbar {
+    border-color: #334155;
+}
+
+[data-theme="dark"] .note-compose-box__hint {
+    color: #64748b;
+}
 
 
 

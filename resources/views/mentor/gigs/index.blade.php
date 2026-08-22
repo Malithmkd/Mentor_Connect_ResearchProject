@@ -21,6 +21,7 @@
                 <table class="table">
                     <thead>
                         <tr>
+                            <th style="width: 60px;">Cover</th>
                             <th>Title</th>
                             <th>Price</th>
                             <th>Status</th>
@@ -31,6 +32,9 @@
                     <tbody>
                         @foreach ($gigs as $gig)
                             <tr>
+                                <td>
+                                    <img src="{{ $gig->cover_image_url }}" alt="{{ $gig->title }}" class="gig-thumb" style="width:48px; height:36px; border-radius:6px; object-fit:cover;">
+                                </td>
                                 <td>
                                     <a href="{{ route('gigs.show', $gig->slug) }}" class="font-semibold" style="color: var(--color-gray-900);">
                                         {{ Str::limit($gig->title, 50) }}

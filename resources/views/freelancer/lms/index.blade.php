@@ -18,25 +18,34 @@
              OVERALL PROGRESS
              ══════════════════════════════════════════════════════ --}}
         @if($enrollments->count() > 0)
-        <div class="panel" style="margin-bottom:2.5rem;background:linear-gradient(135deg,var(--color-primary-dark),var(--color-primary));color:#fff;border:none">
+        <a href="{{ route('lms.overall-progress') }}"
+           style="display:block;text-decoration:none;margin-bottom:2.5rem;border-radius:var(--radius-lg);transition:transform .15s,box-shadow .15s"
+           onmouseenter="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 30px rgba(79,70,229,.35)'"
+           onmouseleave="this.style.transform='';this.style.boxShadow=''"
+           title="View your full all-time progress">
+        <div class="panel" style="background:linear-gradient(135deg,var(--color-primary-dark),var(--color-primary));color:#fff;border:none;margin-bottom:0">
             <div class="panel__body" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:2rem">
                 <div style="flex:1;min-width:280px">
                     <h2 style="font-size:1.5rem;font-weight:700;margin-bottom:.5rem;color:#fff">All-Time Progress</h2>
                     <p style="color:rgba(255,255,255,0.85);font-size:.9rem;margin-bottom:1.5rem">
                         You have completed <strong>{{ $overallCompletedLessons }}</strong> out of <strong>{{ $overallTotalLessons }}</strong> total lessons across all your enrolled courses. Keep up the great work!
                     </p>
-                    
+
                     <div style="background:rgba(255,255,255,0.25);border-radius:999px;height:12px;width:100%;overflow:hidden">
                         <div style="height:100%;width:{{ $overallProgressPct }}%;background:#fff;border-radius:999px;transition:width 0.5s ease"></div>
                     </div>
                 </div>
-                
+
                 <div style="text-align:center;flex-shrink:0">
                     <span style="display:block;font-size:3.5rem;font-weight:800;line-height:1;letter-spacing:-0.03em;color:#fff">{{ $overallProgressPct }}<span style="font-size:2rem">%</span></span>
                     <span style="font-size:.8rem;text-transform:uppercase;letter-spacing:0.1em;color:rgba(255,255,255,0.75);font-weight:700">Completed</span>
+                    <div style="margin-top:.75rem;font-size:.78rem;color:rgba(255,255,255,0.7);display:flex;align-items:center;justify-content:center;gap:.3rem">
+                        📊 View Details →
+                    </div>
                 </div>
             </div>
         </div>
+        </a>
         @endif
 
         {{-- ══════════════════════════════════════════════════════

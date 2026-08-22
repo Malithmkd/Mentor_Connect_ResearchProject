@@ -8,6 +8,7 @@ use App\Http\Requests\Search\SearchGigsRequest;
 use App\Models\Gig;
 use App\Models\Skill;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -142,19 +143,26 @@ class GigController extends Controller
     {
         $data = $request->validated();
 
+        // Handle cover image upload
+        $coverImagePath = null;
+        if ($request->hasFile('cover_image')) {
+            $coverImagePath = $request->file('cover_image')->store('gigs', 'public');
+        }
+
         $gig = Gig::create([
-            'mentor_id' => auth()->id(),
-            'title' => $data['title'],
-            'slug' => Str::slug($data['title']) . '-' . uniqid(),
-            'description' => $data['description'],
-            'what_to_expect' => $data['what_to_expect'] ?? null,
-            'prerequisites' => $data['prerequisites'] ?? null,
-            'delivery_format' => $data['delivery_format'],
-            'experience_level' => $data['experience_level'],
-            'duration_minutes' => $data['duration_minutes'],
-            'price' => $data['price'],
-            'status' => $data['status'],
-            'max_sessions_per_week' => $data['max_sessions_per_week'],
+            'mentor_id'               => auth()->id(),
+            'title'                   => $data['title'],
+            'slug'                    => Str::slug($data['title']) . '-' . uniqid(),
+            'description'             => $data['description'],
+            'what_to_expect'          => $data['what_to_expect'] ?? null,
+            'prerequisites'           => $data['prerequisites'] ?? null,
+            'cover_image'             => $coverImagePath,
+            'delivery_format'         => $data['delivery_format'],
+            'experience_level'        => $data['experience_level'],
+            'duration_minutes'        => $data['duration_minutes'],
+            'price'                   => $data['price'],
+            'status'                  => $data['status'],
+            'max_sessions_per_week'   => $data['max_sessions_per_week'],
             'booking_lead_time_hours' => $data['booking_lead_time_hours'],
         ]);
 
@@ -189,17 +197,27 @@ class GigController extends Controller
 
         $data = $request->validated();
 
+        // Handle cover image upload — delete old one if a new file is provided
+        $coverImagePath = $gig->cover_image;
+        if ($request->hasFile('cover_image')) {
+            if ($coverImagePath) {
+                Storage::disk('public')->delete($coverImagePath);
+            }
+            $coverImagePath = $request->file('cover_image')->store('gigs', 'public');
+        }
+
         $gig->update([
-            'title' => $data['title'] ?? $gig->title,
-            'description' => $data['description'] ?? $gig->description,
-            'what_to_expect' => $data['what_to_expect'] ?? $gig->what_to_expect,
-            'prerequisites' => $data['prerequisites'] ?? $gig->prerequisites,
-            'delivery_format' => $data['delivery_format'] ?? $gig->delivery_format,
-            'experience_level' => $data['experience_level'] ?? $gig->experience_level,
-            'duration_minutes' => $data['duration_minutes'] ?? $gig->duration_minutes,
-            'price' => $data['price'] ?? $gig->price,
-            'status' => $data['status'] ?? $gig->status,
-            'max_sessions_per_week' => $data['max_sessions_per_week'] ?? $gig->max_sessions_per_week,
+            'title'                   => $data['title'] ?? $gig->title,
+            'description'             => $data['description'] ?? $gig->description,
+            'what_to_expect'          => $data['what_to_expect'] ?? $gig->what_to_expect,
+            'prerequisites'           => $data['prerequisites'] ?? $gig->prerequisites,
+            'cover_image'             => $coverImagePath,
+            'delivery_format'         => $data['delivery_format'] ?? $gig->delivery_format,
+            'experience_level'        => $data['experience_level'] ?? $gig->experience_level,
+            'duration_minutes'        => $data['duration_minutes'] ?? $gig->duration_minutes,
+            'price'                   => $data['price'] ?? $gig->price,
+            'status'                  => $data['status'] ?? $gig->status,
+            'max_sessions_per_week'   => $data['max_sessions_per_week'] ?? $gig->max_sessions_per_week,
             'booking_lead_time_hours' => $data['booking_lead_time_hours'] ?? $gig->booking_lead_time_hours,
         ]);
 

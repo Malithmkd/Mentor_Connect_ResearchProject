@@ -254,5 +254,103 @@ class FreelancerLmsController extends Controller
             'cumulative'
         ));
     }
+
+    /**
+     * All-time overall progress page: aggregated across ALL enrollments for this freelancer.
+     */
+    public function showOverallProgress(): \Illuminate\View\View
+    {
+        $freelancerId = auth()->id();
+
+        $enrollments = Enrollment::with([
+                'course.modules.lessons',
+                'course.relationship.mentor',
+                'lessonProgress',
+            ])
+            ->forFreelancer($freelancerId)
+            ->latest()
+            ->get();
+
+        // ── Totals ──────────────────────────────────────────────────────────
+        $overallTotalLessons     = 0;
+        $overallCompletedLessons = 0;
+        $completedCourses        = 0;
+
+        // ── Per-course breakdown (bar chart) ─────────────────────────────────
+        $courseLabels    = [];
+        $courseTotals    = [];
+        $courseCompleted = [];
+
+        foreach ($enrollments as $enrollment) {
+            $total = $enrollment->course->lessons()->count();
+            $done  = $enrollment->lessonProgress()->whereNotNull('completed_at')->count();
+
+            $overallTotalLessons     += $total;
+            $overallCompletedLessons += $done;
+
+            if ($enrollment->isCompleted()) {
+                $completedCourses++;
+            }
+
+            $courseLabels[]    = \Str::limit($enrollment->course->title, 22);
+            $courseTotals[]    = $total;
+            $courseCompleted[] = $done;
+        }
+
+        $overallProgressPct = $overallTotalLessons > 0
+            ? (int) round(($overallCompletedLessons / $overallTotalLessons) * 100)
+            : 0;
+
+        $remainingLessons = max(0, $overallTotalLessons - $overallCompletedLessons);
+
+        // ── 30-day cumulative activity (all enrollments combined) ─────────────
+        $days = collect(range(29, 0))->map(fn($d) => now()->subDays($d)->format('M d'));
+
+        $activityData = collect(range(29, 0))->map(function ($d) use ($enrollments) {
+            $date  = now()->subDays($d)->toDateString();
+            $count = 0;
+            foreach ($enrollments as $enrollment) {
+                $count += $enrollment->lessonProgress
+                    ->whereNotNull('completed_at')
+                    ->filter(fn($p) => $p->completed_at->toDateString() === $date)
+                    ->count();
+            }
+            return $count;
+        });
+
+        $cumulative = [];
+        $running    = 0;
+        foreach ($activityData as $count) {
+            $running     += $count;
+            $cumulative[] = $running;
+        }
+
+        // ── Per-mentor summary ────────────────────────────────────────────────
+        $mentorSummaries = $enrollments
+            ->groupBy(fn($e) => optional($e->course->relationship)->mentor_id ?? 0)
+            ->map(function ($group) {
+                $mentor = optional($group->first()->course->relationship)->mentor;
+                $total  = $group->sum(fn($e) => $e->course->lessons()->count());
+                $done   = $group->sum(fn($e) => $e->lessonProgress()->whereNotNull('completed_at')->count());
+                $pct    = $total > 0 ? (int) round($done / $total * 100) : 0;
+                return ['mentor' => $mentor, 'total' => $total, 'done' => $done, 'pct' => $pct, 'count' => $group->count()];
+            })
+            ->values();
+
+        return view('freelancer.lms.overall_progress', compact(
+            'enrollments',
+            'overallTotalLessons',
+            'overallCompletedLessons',
+            'overallProgressPct',
+            'remainingLessons',
+            'completedCourses',
+            'courseLabels',
+            'courseTotals',
+            'courseCompleted',
+            'days',
+            'cumulative',
+            'mentorSummaries'
+        ));
+    }
 }
 

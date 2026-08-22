@@ -105,6 +105,9 @@
             <div class="gig-grid gig-grid--compact">
                 @forelse ($gigs as $gig)
                     <article class="gig-card">
+                        <a href="{{ route('gigs.show', $gig->slug) }}" class="gig-card__cover">
+                            <img src="{{ $gig->cover_image_url }}" alt="{{ $gig->title }}" class="gig-card__cover-img" loading="lazy">
+                        </a>
                         <div class="gig-card__header">
                             <div class="gig-card__mentor">
                                 <div class="gig-card__avatar">{{ strtoupper(substr($gig->mentor->first_name, 0, 1) . substr($gig->mentor->last_name, 0, 1)) }}</div>

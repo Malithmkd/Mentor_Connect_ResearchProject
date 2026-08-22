@@ -49,6 +49,15 @@
 
         {{-- Floating Glassmorphism Hero Cards --}}
         <div class="hero__visual">
+
+            {{-- Hero illustration --}}
+            <div class="hero__illustration">
+                <img src="{{ asset('images/Hero.png') }}"
+                     alt="A student studying with a mentor online"
+                     class="hero__illustration-img">
+                <div class="hero__illustration-glow"></div>
+            </div>
+
             <div class="hero__card hero__card--1">
                 <div class="hero__card-avatar">SJ</div>
                 <div class="hero__card-info">
@@ -56,15 +65,6 @@
                     <p class="hero__card-role">Principal Architect @Google</p>
                 </div>
                 <div class="hero__card-badge">⭐ 5.0</div>
-            </div>
-
-            <div class="hero__card hero__card--2">
-                <div class="hero__card-avatar" style="background:linear-gradient(135deg,#06b6d4,#3b82f6)">MR</div>
-                <div class="hero__card-info">
-                    <p class="hero__card-name">Michael Ross</p>
-                    <p class="hero__card-role">Lead Staff Dev @Stripe</p>
-                </div>
-                <div class="hero__card-badge">⭐ 4.9</div>
             </div>
 
             <div class="hero__card hero__card--3">
@@ -101,13 +101,13 @@
     <div class="trust__inner">
         <p class="trust__text">Mentors trusted by professionals from top tech companies worldwide</p>
         <div class="trust__logos">
-            <span class="trust__logo">Google</span>
-            <span class="trust__logo">Stripe</span>
-            <span class="trust__logo">Airbnb</span>
-            <span class="trust__logo">Spotify</span>
-            <span class="trust__logo">Shopify</span>
-            <span class="trust__logo">Notion</span>
-            <span class="trust__logo">Meta</span>
+            <span class="trust__logo trust__logo--google">Google</span>
+            <span class="trust__logo trust__logo--stripe">Stripe</span>
+            <span class="trust__logo trust__logo--airbnb">Airbnb</span>
+            <span class="trust__logo trust__logo--spotify">Spotify</span>
+            <span class="trust__logo trust__logo--shopify">Shopify</span>
+            <span class="trust__logo trust__logo--notion">Notion</span>
+            <span class="trust__logo trust__logo--meta">Meta</span>
         </div>
     </div>
 </section>
@@ -131,6 +131,9 @@
         <div class="gig-grid">
             @forelse ($featuredGigs as $gig)
                 <article class="gig-card" style="border-radius:16px; transition:all 0.2s ease;">
+                    <a href="{{ route('gigs.show', $gig->slug) }}" class="gig-card__cover">
+                        <img src="{{ $gig->cover_image_url }}" alt="{{ $gig->title }}" class="gig-card__cover-img" loading="lazy">
+                    </a>
                     <div class="gig-card__header">
                         <div class="gig-card__mentor">
                             <div class="gig-card__avatar" style="border-radius:50%; width:44px; height:44px; background:linear-gradient(135deg,#4f46e5,#7c3aed); color:#fff; font-weight:700; display:flex; align-items:center; justify-content:center;">

@@ -175,8 +175,11 @@ Route::middleware('auth')->group(function () {
         // Mark lesson complete
         Route::post('courses/{enrollment}/lessons/{lesson}/complete', [FreelancerLmsController::class, 'completeLesson'])->name('lesson.complete');
 
-        // Progress analytics
+        // Progress analytics (per course)
         Route::get('courses/{enrollment}/progress', [FreelancerLmsController::class, 'showProgress'])->name('progress');
+
+        // All-time overall progress (across all enrollments)
+        Route::get('progress', [FreelancerLmsController::class, 'showOverallProgress'])->name('overall-progress');
     });
 
     /* ─── LMS: Mentor ─── */

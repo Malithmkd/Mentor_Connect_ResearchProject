@@ -151,28 +151,37 @@
                     </div>
 
                     {{-- Add Note to Thread --}}
-                    <div class="panel" style="margin-bottom:1.5rem; border-left: 3px solid var(--color-primary)">
-                        <div class="panel__header">
-                            <h2 class="panel__title">&#x1F4AC; Add a Note</h2>
+                    <div class="note-compose-card">
+                        <div class="note-compose-card__header">
+                            <h3 class="note-compose-card__title">
+                                <span>💬</span> Add a Note
+                            </h3>
+                            <span class="note-compose-card__badge">Session Thread</span>
                         </div>
-                        <div class="panel__body">
-                            <p style="font-size:.85rem; color:var(--color-text-muted); margin-bottom:.75rem">
-                                Send a message to the mentor to discuss session details.
+                        <div class="note-compose-card__body">
+                            <p class="note-compose-card__desc">
+                                Send a message to the mentor to discuss session agenda, questions, or meeting prep.
                             </p>
                             <form method="POST" action="{{ route('bookings.storeNote', $booking) }}">
                                 @csrf
-                                <div class="form-group" style="margin-bottom:.75rem">
-                                    <textarea name="note" class="form-input"
+                                <div class="note-compose-box">
+                                    <textarea name="note" id="freelancerNoteTextarea" class="note-compose-box__textarea"
                                               rows="3"
-                                              placeholder="Type your message here..."
-                                              style="width:100%; resize:vertical" required></textarea>
-                                    @error('note')
-                                        <p style="color:#ef4444; font-size:.8rem; margin-top:.35rem">{{ $message }}</p>
-                                    @enderror
+                                              placeholder="Type your message or notes here..."
+                                              required></textarea>
+                                    <div class="note-compose-box__toolbar">
+                                        <div class="note-compose-box__hint">
+                                            <span>🔒 Visible to you & your mentor</span>
+                                        </div>
+                                        <button type="submit" class="note-compose-box__btn">
+                                            <span>Send Message</span>
+                                            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2 8l12-6-4 12-3-5-5-1z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                        </button>
+                                    </div>
                                 </div>
-                                <button type="submit" class="btn btn--primary btn--sm" style="width:100%">
-                                    Send Message &#x2192;
-                                </button>
+                                @error('note')
+                                    <p style="color:#ef4444; font-size:.8rem; margin-top:.4rem">{{ $message }}</p>
+                                @enderror
                             </form>
                         </div>
                     </div>
@@ -368,13 +377,13 @@
                                             <option value="">Select type…</option>
                                             <option value="hourly">Hourly</option>
                                             <option value="monthly">Monthly Retainer</option>
-                                            <option value="per_module">Per Module</option>
+                                            <option value="per_module">Per Module</option> 
                                             <option value="custom">Custom / Discuss Later</option>
                                         </select>
                                     </div>
 
                                     <div class="form__group">
-                                        <label class="form__label" for="payment_amount">Agreed Amount (USD, optional)</label>
+                                        <label class="form__label" for="payment_amount">Agreed Amount (Rs, optional)</label>
                                         <input type="number" name="payment_amount" id="payment_amount"
                                                class="form__input" min="0" step="0.01" placeholder="e.g. 50.00">
                                     </div>

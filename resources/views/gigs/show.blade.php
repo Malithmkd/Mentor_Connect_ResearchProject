@@ -15,6 +15,10 @@
 
         <div class="gig-detail__grid">
             <div class="gig-detail__main">
+                <div class="gig-detail__cover">
+                    <img src="{{ $gig->cover_image_url }}" alt="{{ $gig->title }}" class="gig-detail__cover-img">
+                </div>
+
                 <h1 class="gig-detail__title">{{ $gig->title }}</h1>
 
                 <div class="gig-detail__mentor">

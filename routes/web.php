@@ -23,18 +23,13 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SkillOnboardingController;
 use Illuminate\Support\Facades\Route;
 
-/**
- * Web Routes
- * Laravel 11 — clean, role-based routing with middleware chains
- */
-
 /* ═══ Public Routes ═══ */
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
 Route::get('/mentors', [GigController::class, 'index'])->name('gigs.index');
 Route::get('/mentors/{slug}', [GigController::class, 'show'])->name('gigs.show');
 
-/* ═══ Auth Routes (Guest Only) ═══ */
+/* ═══ Auth Routes (Guest Only login and registrations) ═══ */ 
 Route::middleware('guest')->group(function () {
     // Registration
     Route::get('/register', [RegisterController::class, 'show'])->name('register');

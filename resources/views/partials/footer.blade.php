@@ -65,7 +65,7 @@
         </div>
 
         <div class="site-footer__bottom">
-            <p class="site-footer__copyright">&copy; {{ date('Y') }} MentorConnect. All rights reserved.</p>
+            <p class="site-footer__copyright">&copy; {{ date('Y') }} MentorConnect | All rights reserved | Malith Dodangoda</p>
         </div>
     </div>
 </footer>

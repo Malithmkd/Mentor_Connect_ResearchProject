@@ -10,7 +10,7 @@
     <div class="hero__inner">
         <div class="hero__content">
             <div class="hero__badge-pill">
-                <span>✨</span> Empowering 1,000+ Developers & Mentors
+                 Empowering 1,000+ Developers & Mentors <span>✨</span>
             </div>
 
             <h1 class="hero__title">
@@ -24,11 +24,11 @@
 
             <div class="hero__actions">
                 <a href="{{ route('gigs.index') }}" class="btn btn--primary btn--lg" style="border-radius:12px; padding:0.9rem 1.75rem; font-weight:700; box-shadow:0 8px 25px rgba(79,70,229,0.35);">
-                    🔍 Find a Mentor Now
+                    Find a Mentor Now →
                 </a>
                 <a href="{{ route('register') }}" class="btn btn--ghost btn--lg" style="border-radius:12px; padding:0.9rem 1.75rem; font-weight:600;">
                     Become a Mentor →
-                </a>
+                </a> 
             </div>
 
             <div class="hero__stats">
@@ -195,7 +195,7 @@
     <div class="lms-spotlight__inner">
         <div>
             <div style="display:inline-flex; align-items:center; gap:0.4rem; padding:0.35rem 0.85rem; border-radius:20px; background:rgba(168,85,247,0.2); color:#c084fc; font-size:0.8rem; font-weight:700; margin-bottom:1rem;">
-                🎓 Long-Term LMS Learning
+                Long-Term LMS Learning ...
             </div>
             <h2 class="lms-spotlight__title">Go Beyond One-Off Sessions with Structured Course Modules</h2>
             <p class="lms-spotlight__desc">
@@ -226,8 +226,8 @@
                 When a mentor accepts your request, your personal LMS dashboard unlocks with interactive lessons, downloadable resources, and progress tracking.
             </p>
             <div style="padding:0.75rem 1rem; background:rgba(255,255,255,0.08); border-radius:10px; font-size:0.85rem; color:#e2e8f0; font-weight:600; display:flex; align-items:center; justify-content:space-between;">
-                <span>🟢 1 Active Mentorship</span>
-                <span style="color:#c084fc;">30 Days Remaining</span>
+                <span>🟢 Active Mentorship is here</span> 
+                <span style="color:#c084fc;">Achieve your goals</span>
             </div>
         </div>
     </div>
@@ -241,17 +241,17 @@
         <h2 class="steps__title" style="text-align:center; font-size:2rem; font-weight:800; margin-bottom:2.5rem;">How MentorConnect Works</h2>
         <div class="steps__grid">
             <div class="step" style="border-radius:16px; padding:2rem; transition:transform 0.2s ease;">
-                <div class="step__number" style="background:linear-gradient(135deg,#4f46e5,#7c3aed); -webkit-background-clip:text; -webkit-text-fill-color:transparent; font-size:2.5rem; font-weight:800;">01</div>
+                <div class="step__number" style="background:linear-gradient(135deg,#4f46e5,#7c3aed); -webkit-background-clip:text; -webkit-text-fill-color:transparent; font-size:2rem; font-weight:800;">01</div>
                 <h3 class="step__title" style="font-size:1.15rem; font-weight:700; margin:0.75rem 0 0.5rem;">Find Your Ideal Mentor</h3>
                 <p class="step__desc">Browse by skill, experience level, price, or rating. Use skill-based personalized recommendations to find your match.</p>
             </div>
             <div class="step" style="border-radius:16px; padding:2rem; transition:transform 0.2s ease;">
-                <div class="step__number" style="background:linear-gradient(135deg,#7c3aed,#ec4899); -webkit-background-clip:text; -webkit-text-fill-color:transparent; font-size:2.5rem; font-weight:800;">02</div>
+                <div class="step__number" style="background:linear-gradient(135deg,#7c3aed,#ec4899); -webkit-background-clip:text; -webkit-text-fill-color:transparent; font-size:2rem; font-weight:800;">02</div>
                 <h3 class="step__title" style="font-size:1.15rem; font-weight:700; margin:0.75rem 0 0.5rem;">Book a 1-on-1 Session</h3>
                 <p class="step__desc">Select a gig, request a date, and add your note. Get quick response confirmations with video call meeting links.</p>
             </div>
             <div class="step" style="border-radius:16px; padding:2rem; transition:transform 0.2s ease;">
-                <div class="step__number" style="background:linear-gradient(135deg,#ec4899,#f59e0b); -webkit-background-clip:text; -webkit-text-fill-color:transparent; font-size:2.5rem; font-weight:800;">03</div>
+                <div class="step__number" style="background:linear-gradient(135deg,#ec4899,#f59e0b); -webkit-background-clip:text; -webkit-text-fill-color:transparent; font-size:2rem; font-weight:800;">03</div>
                 <h3 class="step__title" style="font-size:1.15rem; font-weight:700; margin:0.75rem 0 0.5rem;">Learn, Review & Extend</h3>
                 <p class="step__desc">Connect via video call, receive feedback, leave interactive 5-star reviews, and upgrade to long-term mentorship modules.</p>
             </div>
@@ -268,12 +268,12 @@
         <p class="home-cta__sub">Join thousands of developers, designers, and tech professionals learning directly from industry experts.</p>
         <div class="home-cta__actions">
             <a href="{{ route('gigs.index') }}" class="btn btn--primary btn--lg" style="background:#ffffff; color:#4f46e5; border:none; border-radius:12px; font-weight:800; padding:0.9rem 1.75rem;">
-                🔍 Find Your Mentor
+                Find Your Mentor
             </a>
             <a href="{{ route('register') }}" class="btn btn--ghost btn--lg" style="border-color:rgba(255,255,255,0.4); color:#ffffff; border-radius:12px; font-weight:700; padding:0.9rem 1.75rem;">
                 Become a Mentor →
             </a>
         </div>
     </div>
-</section>
+</section> 
 @endsection

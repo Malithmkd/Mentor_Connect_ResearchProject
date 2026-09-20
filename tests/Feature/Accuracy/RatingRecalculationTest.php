@@ -4,7 +4,7 @@ namespace Tests\Feature\Accuracy;
 
 use App\Models\Booking;
 use App\Models\Gig;
-use App\Models\MentorProfile;
+use App\Models\MentorProfile; 
 use App\Models\Review;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;

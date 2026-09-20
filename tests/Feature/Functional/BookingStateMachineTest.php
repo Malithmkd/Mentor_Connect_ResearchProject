@@ -362,7 +362,7 @@ class BookingStateMachineTest extends TestCase
     // ─── Cancellation ─────────────────────────────────────────────────────────
 
     /** @test */
-    public function freelancer_can_cancel_an_accepted_booking(): void
+    public function freelancer_cannot_cancel_an_accepted_booking(): void
     {
         $freelancer = $this->makeFreelancer();
         $mentor     = $this->makeMentor();
@@ -373,7 +373,30 @@ class BookingStateMachineTest extends TestCase
             ->between($freelancer, $mentor, $gig)
             ->create();
 
+        // Once the session has been accepted, the freelancer loses cancellation rights.
         $this->actingAs($freelancer)
+             ->post(route('bookings.cancel', $booking))
+             ->assertForbidden();
+
+        $this->assertDatabaseHas('bookings', [
+            'id'     => $booking->id,
+            'status' => BookingStatus::ACCEPTED->value, // unchanged
+        ]);
+    }
+
+    /** @test */
+    public function mentor_can_cancel_an_accepted_booking(): void
+    {
+        $freelancer = $this->makeFreelancer();
+        $mentor     = $this->makeMentor();
+        $gig        = $this->makePublishedGig($mentor);
+
+        $booking = Booking::factory()
+            ->accepted()
+            ->between($freelancer, $mentor, $gig)
+            ->create();
+
+        $this->actingAs($mentor)
              ->post(route('bookings.cancel', $booking))
              ->assertSessionHas('success');
 

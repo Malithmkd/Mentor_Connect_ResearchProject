@@ -121,6 +121,22 @@
                             <span class="session-notes-thread__title">Session Notes</span>
                         </div>
 
+                        {{-- Initial request note the freelancer sent when booking --}}
+                        @if ($booking->freelancer_note)
+                            <div class="session-note-bubble session-note-bubble--freelancer session-note-bubble--initial">
+                                <div class="session-note-bubble__meta">
+                                    <span class="session-note-bubble__avatar">
+                                        {{ strtoupper(substr($booking->freelancer->first_name, 0, 1)) }}
+                                    </span>
+                                    <span class="session-note-bubble__name">You</span>
+                                    <span class="session-note-bubble__role">Freelancer</span>
+
+                                    <span style="font-size: 0.7rem; color: #a1a1aa; margin-left: auto;">{{ $booking->requested_at->diffForHumans() }}</span>
+                                </div>
+                                <p class="session-note-bubble__text">{{ $booking->freelancer_note }}</p>
+                            </div>
+                        @endif
+
                         @forelse ($booking->notes as $note)
                             <div class="session-note-bubble {{ $note->user_id === $booking->freelancer_id ? 'session-note-bubble--freelancer' : 'session-note-bubble--mentor' }}">
                                 <div class="session-note-bubble__meta">
@@ -146,7 +162,9 @@
                                 <p class="session-note-bubble__text">{{ $note->note }}</p>
                             </div>
                         @empty
-                            <p style="font-size: .85rem; color: var(--color-text-muted); padding: 1rem;">No notes yet.</p>
+                            @if (!$booking->freelancer_note)
+                                <p style="font-size: .85rem; color: var(--color-text-muted); padding: 1rem;">No notes yet.</p>
+                            @endif
                         @endforelse
                     </div>
 
@@ -190,7 +208,16 @@
 
             <div>
                 {{-- Cancel action --}}
-                @if (in_array($booking->status->value, ['requested', 'accepted', 'scheduled']))
+                {{-- Freelancers may only cancel while the session is still pending (requested).
+                     Once a mentor accepts the session the freelancer loses the right to cancel.
+                     Only the mentor (or admin) can cancel an accepted/scheduled session. --}}
+                @php
+                    $isFreelancer = auth()->id() === $booking->freelancer_id;
+                    $showCancel = $isFreelancer
+                        ? $booking->status->value === 'requested'
+                        : in_array($booking->status->value, ['requested', 'accepted', 'scheduled']);
+                @endphp
+                @if ($showCancel)
                     <div class="panel" style="margin-bottom:1.5rem">
                         <div class="panel__header"><h2 class="panel__title">Actions</h2></div>
                         <div class="panel__body">

@@ -23,6 +23,7 @@ class Lesson extends Model
         'content',
         'video_url',
         'pdf_path',
+        'pdf_name',
         'sort_order',
     ];
 
@@ -58,12 +59,16 @@ class Lesson extends Model
             : null;
     }
 
-    /** Basename of the PDF for display */
+    /** Friendly display name for the PDF — uses mentor-set name if available, else original filename */
     public function pdfName(): ?string
     {
-        return $this->pdf_path
-            ? basename($this->pdf_path)
-            : null;
+        if (!$this->pdf_path) {
+            return null;
+        }
+
+        return $this->pdf_name
+            ? $this->pdf_name
+            : basename($this->pdf_path);
     }
 
     /**

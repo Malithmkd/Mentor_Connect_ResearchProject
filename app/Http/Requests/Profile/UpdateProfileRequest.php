@@ -30,9 +30,10 @@ class UpdateProfileRequest extends FormRequest
                 'max:255',
                 Rule::unique('users')->ignore($userId),
             ],
-            'bio' => ['nullable', 'string', 'max:1000'],
-            'location' => ['nullable', 'string', 'max:100'],
-            'timezone' => ['nullable', 'string', 'max:50'],
+            'bio'       => ['nullable', 'string', 'max:1000'],
+            'location'  => ['nullable', 'string', 'max:100'],
+            'skills'    => ['nullable', 'array'],
+            'skills.*'  => ['integer', 'exists:skills,id'],
         ];
 
         // Mentor-specific fields

@@ -173,6 +173,16 @@
                                 @error('pdf')
                                     <p class="form__error">{{ $message }}</p>
                                 @enderror
+
+                                {{-- PDF display name --}}
+                                <div style="margin-top:.6rem">
+                                    <label class="form__label" style="font-size:.8rem">PDF Display Name</label>
+                                    <input type="text" name="pdf_name" class="form__input"
+                                           value="{{ $lesson->pdf_name }}"
+                                           placeholder="e.g. Week 1 Handout — Introduction Notes"
+                                           style="font-size:.85rem">
+                                    <p style="font-size:.75rem;color:var(--color-text-muted);margin-top:.2rem">Give this file a readable name. Freelancers will see this name instead of the file path.</p>
+                                </div>
                             </div>
 
                             <div style="display:flex;gap:.5rem">
@@ -226,6 +236,15 @@
                                     @error('pdf')
                                         <p class="form__error">{{ $message }}</p>
                                     @enderror
+
+                                    {{-- PDF display name --}}
+                                    <div style="margin-top:.6rem">
+                                        <label class="form__label" style="font-size:.8rem">PDF Display Name</label>
+                                        <input type="text" name="pdf_name" class="form__input"
+                                               placeholder="e.g. Week 1 Handout — Introduction Notes"
+                                               style="font-size:.85rem">
+                                        <p style="font-size:.75rem;color:var(--color-text-muted);margin-top:.2rem">Give this file a readable name. Freelancers will see this instead of the file path.</p>
+                                    </div>
                                 </div>
 
                                 <button type="submit" class="btn btn--primary btn--sm">Add Lesson</button>

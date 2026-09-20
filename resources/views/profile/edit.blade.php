@@ -103,15 +103,9 @@
                     <textarea id="bio" name="bio" class="adm-form-input" rows="3" style="resize:vertical;">{{ old('bio', $user->bio) }}</textarea>
                 </div>
 
-                <div class="adm-form-row" style="margin-bottom:20px;">
-                    <div class="adm-form-field adm-form-field--grow">
-                        <label for="location" class="adm-form-label">Location</label>
-                        <input type="text" id="location" name="location" class="adm-form-input" value="{{ old('location', $user->location) }}" placeholder="City, Country">
-                    </div>
-                    <div class="adm-form-field adm-form-field--grow">
-                        <label for="timezone" class="adm-form-label">Timezone</label>
-                        <input type="text" id="timezone" name="timezone" class="adm-form-input" value="{{ old('timezone', $user->timezone) }}" placeholder="UTC">
-                    </div>
+                <div class="adm-form-field" style="margin-bottom:20px;">
+                    <label for="location" class="adm-form-label">Location</label>
+                    <input type="text" id="location" name="location" class="adm-form-input" value="{{ old('location', $user->location) }}" placeholder="City, Country">
                 </div>
 
                 <div style="display:flex;gap:8px;">
@@ -274,15 +268,42 @@ function previewAdminAvatar(input) {
                     <textarea id="bio" name="bio" class="form__textarea" rows="3">{{ old('bio', $user->bio) }}</textarea>
                 </div>
 
-                <div class="form__row">
-                    <div class="form__group">
-                        <label for="location" class="form__label">Location</label>
-                        <input type="text" id="location" name="location" class="form__input" value="{{ old('location', $user->location) }}" placeholder="City, Country">
+                <div class="form__group">
+                    <label for="location" class="form__label">Location</label>
+                    <input type="text" id="location" name="location" class="form__input" value="{{ old('location', $user->location) }}" placeholder="City, Country">
+                </div>
+
+                {{-- ── Skills Picker ── --}}
+                @php
+                    $userSkillIds = $user->skills->pluck('id')->toArray();
+                    $skillsByCategory = $allSkills->groupBy('category');
+                @endphp
+                <div class="form__group">
+                    <label class="form__label">Skills & Interests</label>
+                    <p style="font-size:.82rem;color:var(--color-text-muted,#6b7280);margin:.25rem 0 .85rem">Select the skills that best describe your expertise or interests.</p>
+                    <div class="skills-picker">
+                        @forelse($skillsByCategory as $category => $catSkills)
+                            @if($category)
+                                <p class="skills-picker__category">{{ $category }}</p>
+                            @endif
+                            <div class="skills-picker__grid">
+                                @foreach($catSkills as $skill)
+                                    <label class="skills-picker__item {{ in_array($skill->id, old('skills', $userSkillIds)) ? 'is-selected' : '' }}">
+                                        <input type="checkbox" name="skills[]" value="{{ $skill->id }}"
+                                               {{ in_array($skill->id, old('skills', $userSkillIds)) ? 'checked' : '' }}
+                                               onchange="this.closest('.skills-picker__item').classList.toggle('is-selected', this.checked)">
+                                        @if($skill->icon)<span>{{ $skill->icon }}</span>@endif
+                                        <span>{{ $skill->name }}</span>
+                                    </label>
+                                @endforeach
+                            </div>
+                        @empty
+                            <p style="font-size:.85rem;color:var(--color-text-muted,#6b7280)">No skills available yet.</p>
+                        @endforelse
                     </div>
-                    <div class="form__group">
-                        <label for="timezone" class="form__label">Timezone</label>
-                        <input type="text" id="timezone" name="timezone" class="form__input" value="{{ old('timezone', $user->timezone) }}" placeholder="UTC">
-                    </div>
+                    @error('skills')
+                        <p class="form__error">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 @if ($user->isMentor() && $user->mentorProfile)
@@ -386,6 +407,37 @@ function previewAdminAvatar(input) {
         </div>
     </div>
 </section>
+
+@push('styles')
+<style>
+.skills-picker { display: flex; flex-direction: column; gap: .6rem; }
+.skills-picker__category {
+    font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em;
+    color: var(--color-text-muted,#9ca3af); margin: .4rem 0 .1rem;
+}
+.skills-picker__grid {
+    display: flex; flex-wrap: wrap; gap: .45rem;
+}
+.skills-picker__item {
+    display: inline-flex; align-items: center; gap: .35rem;
+    padding: .35rem .75rem;
+    border: 1.5px solid var(--color-gray-200,#e5e7eb);
+    border-radius: 20px;
+    font-size: .82rem; font-weight: 500; cursor: pointer;
+    user-select: none;
+    transition: background .15s, border-color .15s, color .15s;
+    background: var(--color-white,#fff);
+    color: var(--color-gray-700,#374151);
+}
+.skills-picker__item input[type="checkbox"] { display: none; }
+.skills-picker__item:hover { border-color: #6366f1; color: #4f46e5; background: #f5f3ff; }
+.skills-picker__item.is-selected {
+    background: #ede9fe; border-color: #6366f1; color: #4f46e5; font-weight: 600;
+}
+[data-theme="dark"] .skills-picker__item { background: #1e1b4b; border-color: #3730a3; color: #c7d2fe; }
+[data-theme="dark"] .skills-picker__item.is-selected { background: #312e81; border-color: #818cf8; color: #a5b4fc; }
+</style>
+@endpush
 
 @push('scripts')
 <script>

@@ -78,24 +78,32 @@
         </div>
         @endif
 
-        {{-- ── PDF Notes Download ── --}}
+        {{-- ── PDF Notes ── --}}
         @if($lesson->hasPdf())
         <div class="panel" style="margin-bottom:1.5rem;border-left:4px solid var(--color-primary)">
             <div class="panel__body" style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap">
                 <div style="font-size:2rem;flex-shrink:0">📄</div>
                 <div style="flex:1;min-width:0">
                     <p style="font-weight:700;color:var(--color-gray-900);margin:0 0 .15rem">PDF Notes</p>
-                    <p style="font-size:.8rem;color:var(--color-gray-500);margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
+                    <p style="font-size:.85rem;color:var(--color-gray-600);margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
                         {{ $lesson->pdfName() }}
                     </p>
                 </div>
-                <a href="{{ $lesson->pdfUrl() }}"
-                   target="_blank"
-                   rel="noopener"
-                   class="btn btn--primary btn--sm"
-                   download>
-                    ⬇ Download PDF
-                </a>
+                <div style="display:flex;gap:.5rem;flex-shrink:0">
+                    <a href="{{ $lesson->pdfUrl() }}"
+                       target="_blank"
+                       rel="noopener"
+                       class="btn btn--ghost btn--sm">
+                        👁 View
+                    </a>
+                    <a href="{{ $lesson->pdfUrl() }}"
+                       target="_blank"
+                       rel="noopener"
+                       class="btn btn--primary btn--sm"
+                       download="{{ $lesson->pdfName() }}">
+                        ⬇ Download
+                    </a>
+                </div>
             </div>
         </div>
         @endif

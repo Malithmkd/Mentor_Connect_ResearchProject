@@ -107,6 +107,19 @@
             Gig Management
         </a>
 
+        <a href="{{ route('admin.skills.index') }}"
+           class="adm-sidebar__link {{ request()->routeIs('admin.skills.*') ? 'is-active' : '' }}">
+            <svg class="adm-sidebar__icon" viewBox="0 0 20 20" fill="none">
+                <path d="M3 6a1 1 0 011-1h4l2 2h6a1 1 0 011 1v7a1 1 0 01-1 1H4a1 1 0 01-1-1V6z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                <path d="M7 13l2-2 2 2 3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Skills
+            @php $skillsCount = \App\Models\Skill::count(); @endphp
+            @if($skillsCount > 0)
+                <span class="adm-sidebar__badge" style="background:#6366f1">{{ $skillsCount }}</span>
+            @endif
+        </a>
+
         <a href="{{ route('admin.dashboard') }}"
            class="adm-sidebar__link {{ false ? 'is-active' : '' }}">
             <svg class="adm-sidebar__icon" viewBox="0 0 20 20" fill="none">

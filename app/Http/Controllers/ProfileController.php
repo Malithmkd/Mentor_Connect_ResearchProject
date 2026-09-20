@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Profile\UpdateProfileRequest;
 use App\Models\MentorProfile;
 use App\Models\Review;
+use App\Models\Skill;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -63,7 +64,8 @@ class ProfileController extends Controller
         $user = auth()->user();
 
         return view('profile.edit', [
-            'user' => $user->load('mentorProfile'),
+            'user'      => $user->load(['mentorProfile', 'skills']),
+            'allSkills' => Skill::active()->orderBy('category')->orderBy('name')->get(),
         ]);
     }
 
@@ -77,11 +79,18 @@ class ProfileController extends Controller
 
         // Update base user fields
         $userFields = array_intersect_key($data, array_flip([
-            'first_name', 'last_name', 'email', 'bio', 'location', 'timezone',
+            'first_name', 'last_name', 'email', 'bio', 'location',
         ]));
 
         if (!empty($userFields)) {
             $user->update($userFields);
+        }
+
+        // Sync preferred skills (works for both mentors and freelancers)
+        if (isset($data['skills'])) {
+            $user->skills()->sync($data['skills']);
+        } else {
+            $user->skills()->detach();
         }
 
         // Update mentor profile fields

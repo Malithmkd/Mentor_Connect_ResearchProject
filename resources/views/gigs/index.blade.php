@@ -3,10 +3,48 @@
 @section('title', 'Find Mentors')
 
 @section('content')
-<section class="page-header page-header--compact">
-    <div class="page-header__inner">
-        <h1 class="page-header__title">Find a Mentor</h1>
-        <p class="page-header__subtitle">Browse {{ number_format(\App\Models\Gig::published()->count()) }} sessions from verified mentors</p>
+{{-- ── Hero Search Bar ─────────────────────────────────────────────────── --}}
+<section class="gig-hero">
+    <div class="gig-hero__inner">
+        <h1 class="gig-hero__title">Find the Right Mentor</h1>
+        <p class="gig-hero__subtitle">
+            Browse {{ number_format(\App\Models\Gig::published()->count()) }} sessions from verified mentors — open to everyone.
+        </p>
+        <form method="GET" action="{{ route('gigs.index') }}" class="gig-hero__form" id="heroSearchForm" role="search">
+            <div class="gig-hero__search-wrap">
+                <svg class="gig-hero__search-icon" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                    <circle cx="9" cy="9" r="6" stroke="currentColor" stroke-width="1.8"/>
+                    <path d="M13.5 13.5L17 17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                </svg>
+                <input
+                    type="search"
+                    id="heroSearchInput"
+                    name="q"
+                    class="gig-hero__input"
+                    value="{{ request('q') }}"
+                    placeholder="Search by skill, topic, or mentor name…"
+                    autocomplete="off"
+                    aria-label="Search gigs"
+                >
+                <button type="submit" class="gig-hero__btn">Search</button>
+            </div>
+            {{-- Preserve other active filters when searching from the hero bar --}}
+            @foreach(request()->except('q', 'page') as $key => $val)
+                @if(is_array($val))
+                    @foreach($val as $v)
+                        <input type="hidden" name="{{ $key }}[]" value="{{ $v }}">
+                    @endforeach
+                @else
+                    <input type="hidden" name="{{ $key }}" value="{{ $val }}">
+                @endif
+            @endforeach
+        </form>
+        @if(request('q'))
+            <p class="gig-hero__query-label">
+                Showing results for <strong>"{{ request('q') }}"</strong>
+                <a href="{{ route('gigs.index', request()->except('q', 'page')) }}" class="gig-hero__clear-link">✕ Clear</a>
+            </p>
+        @endif
     </div>
 </section>
 
@@ -164,6 +202,115 @@
 
 @push('styles')
 <style>
+/* ── Hero Search Bar ── */
+.gig-hero {
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 60%, #a855f7 100%);
+    padding: 3.5rem 1.5rem 3rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+.gig-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Ccircle cx='30' cy='30' r='28'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
+    pointer-events: none;
+}
+.gig-hero__inner {
+    position: relative;
+    max-width: 680px;
+    margin: 0 auto;
+}
+.gig-hero__title {
+    font-size: clamp(1.6rem, 4vw, 2.4rem);
+    font-weight: 700;
+    color: #fff;
+    margin: 0 0 .5rem;
+    letter-spacing: -.02em;
+}
+.gig-hero__subtitle {
+    color: rgba(255,255,255,.82);
+    font-size: 1rem;
+    margin: 0 0 1.75rem;
+}
+.gig-hero__form {
+    width: 100%;
+}
+.gig-hero__search-wrap {
+    display: flex;
+    align-items: center;
+    background: #fff;
+    border-radius: 50px;
+    box-shadow: 0 8px 32px rgba(0,0,0,.18), 0 2px 8px rgba(79,70,229,.15);
+    overflow: hidden;
+    transition: box-shadow .2s;
+}
+.gig-hero__search-wrap:focus-within {
+    box-shadow: 0 8px 40px rgba(79,70,229,.35), 0 0 0 3px rgba(255,255,255,.4);
+}
+.gig-hero__search-icon {
+    flex-shrink: 0;
+    margin-left: 1.1rem;
+    color: #9ca3af;
+    pointer-events: none;
+}
+.gig-hero__input {
+    flex: 1;
+    border: none;
+    outline: none;
+    padding: .875rem .75rem .875rem .6rem;
+    font-size: 1rem;
+    font-family: inherit;
+    color: #111827;
+    background: transparent;
+    min-width: 0;
+}
+.gig-hero__input::placeholder { color: #9ca3af; }
+.gig-hero__input::-webkit-search-cancel-button { cursor: pointer; }
+.gig-hero__btn {
+    flex-shrink: 0;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    color: #fff;
+    border: none;
+    padding: .8rem 1.6rem;
+    font-size: .95rem;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 0 50px 50px 0;
+    transition: opacity .15s, transform .1s;
+    white-space: nowrap;
+    font-family: inherit;
+}
+.gig-hero__btn:hover  { opacity: .9; }
+.gig-hero__btn:active { transform: scale(.97); }
+.gig-hero__query-label {
+    margin-top: .9rem;
+    color: rgba(255,255,255,.9);
+    font-size: .9rem;
+}
+.gig-hero__clear-link {
+    margin-left: .6rem;
+    color: rgba(255,255,255,.75);
+    text-decoration: none;
+    background: rgba(255,255,255,.15);
+    border-radius: 20px;
+    padding: .15rem .6rem;
+    font-size: .82rem;
+    transition: background .15s;
+}
+.gig-hero__clear-link:hover { background: rgba(255,255,255,.28); color: #fff; }
+
+/* Dark mode */
+[data-theme="dark"] .gig-hero__search-wrap { background: #1e293b; }
+[data-theme="dark"] .gig-hero__input       { color: #e2e8f0; }
+[data-theme="dark"] .gig-hero__input::placeholder { color: #64748b; }
+
+@media (max-width: 480px) {
+    .gig-hero { padding: 2.5rem 1rem 2rem; }
+    .gig-hero__btn { padding: .8rem 1rem; font-size: .85rem; }
+}
+
 /* ── Responsive Find Mentor ── */
 .browse__filter-toggle {
     display: none;
@@ -201,7 +348,7 @@
     font-weight: 700;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
     .browse__filter-toggle {
         display: flex;
     }
@@ -284,8 +431,18 @@ function toggleFilters() {
 // Auto-open drawer if there are active filters on mobile
 (function () {
     const activeFilters = {{ $activeFilters }};
-    if (activeFilters > 0 && window.innerWidth <= 768) {
+    if (activeFilters > 0 && window.innerWidth <= 1024) {
         toggleFilters();
+    }
+})();
+
+// Sync hero search ↔ sidebar keyword input so both stay in sync
+(function () {
+    const heroInput    = document.getElementById('heroSearchInput');
+    const sidebarInput = document.querySelector('#mainFilterForm input[name="q"]');
+    if (heroInput && sidebarInput) {
+        heroInput.addEventListener('input', function () { sidebarInput.value = this.value; });
+        sidebarInput.addEventListener('input', function () { heroInput.value = this.value; });
     }
 })();
 </script>

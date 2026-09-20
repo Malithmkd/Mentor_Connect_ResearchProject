@@ -96,13 +96,16 @@ class ModuleLessonController extends Controller
             'content'   => ['nullable', 'string'],
             'video_url' => ['nullable', 'url', 'max:500'],
             'pdf'       => ['nullable', 'file', 'mimes:pdf', 'max:10240'], // 10 MB
+            'pdf_name'  => ['nullable', 'string', 'max:255'],
         ]);
 
         $maxOrder = $module->lessons()->max('sort_order') ?? -1;
 
         $pdfPath = null;
+        $pdfName = null;
         if ($request->hasFile('pdf')) {
             $pdfPath = $request->file('pdf')->store('lms-pdfs', 'public');
+            $pdfName = trim($validated['pdf_name'] ?? '') ?: $request->file('pdf')->getClientOriginalName();
         }
 
         $module->lessons()->create([
@@ -110,6 +113,7 @@ class ModuleLessonController extends Controller
             'content'    => $validated['content'] ?? null,
             'video_url'  => $validated['video_url'] ?? null,
             'pdf_path'   => $pdfPath,
+            'pdf_name'   => $pdfName,
             'sort_order' => $maxOrder + 1,
         ]);
 
@@ -127,10 +131,12 @@ class ModuleLessonController extends Controller
             'content'    => ['nullable', 'string'],
             'video_url'  => ['nullable', 'url', 'max:500'],
             'pdf'        => ['nullable', 'file', 'mimes:pdf', 'max:10240'], // 10 MB
+            'pdf_name'   => ['nullable', 'string', 'max:255'],
             'remove_pdf' => ['nullable', 'boolean'],
         ]);
 
         $pdfPath = $lesson->pdf_path; // keep existing by default
+        $pdfName = $lesson->pdf_name;
 
         if ($request->boolean('remove_pdf')) {
             // Explicitly remove PDF
@@ -138,12 +144,17 @@ class ModuleLessonController extends Controller
                 Storage::disk('public')->delete($pdfPath);
             }
             $pdfPath = null;
+            $pdfName = null;
         } elseif ($request->hasFile('pdf')) {
             // Replace with new PDF — delete old first
             if ($pdfPath) {
                 Storage::disk('public')->delete($pdfPath);
             }
             $pdfPath = $request->file('pdf')->store('lms-pdfs', 'public');
+            $pdfName = trim($validated['pdf_name'] ?? '') ?: $request->file('pdf')->getClientOriginalName();
+        } elseif (!empty(trim($validated['pdf_name'] ?? ''))) {
+            // Only name was changed, no new file
+            $pdfName = trim($validated['pdf_name']);
         }
 
         $lesson->update([
@@ -151,6 +162,7 @@ class ModuleLessonController extends Controller
             'content'   => $validated['content'] ?? null,
             'video_url' => $validated['video_url'] ?? null,
             'pdf_path'  => $pdfPath,
+            'pdf_name'  => $pdfName,
         ]);
 
         return redirect()

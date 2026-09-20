@@ -69,7 +69,9 @@ class BookingPolicy
     }
 
     /**
-     * Either party can cancel if the booking is in a cancellable state.
+     * Either party can cancel if the booking is in a cancellable state,
+     * with one exception: once a session is accepted, the freelancer can
+     * no longer cancel — only the mentor or an admin may do so.
      * Admin can always cancel.
      */
     public function cancel(User $user, Booking $booking): bool
@@ -78,8 +80,13 @@ class BookingPolicy
             return false;
         }
 
-        return $user->id === $booking->freelancer_id
-            || $user->id === $booking->mentor_id
+        // After acceptance the freelancer loses the right to cancel.
+        // Only the mentor (or admin) can cancel an accepted/scheduled session.
+        if ($user->id === $booking->freelancer_id) {
+            return $booking->status === BookingStatus::REQUESTED;
+        }
+
+        return $user->id === $booking->mentor_id
             || $user->isAdmin();
     }
 

@@ -205,6 +205,10 @@ Route::middleware('auth')->group(function () {
         Route::delete('courses/{course}', [CourseController::class, 'destroy'])
             ->name('courses.destroy');
 
+        // Enrollments
+        Route::patch('enrollments/{enrollment}/complete', [CourseController::class, 'completeEnrollment'])
+            ->name('enrollments.complete');
+
         // Modules
         Route::post('courses/{course}/modules', [ModuleLessonController::class, 'storeModule'])
             ->name('modules.store');

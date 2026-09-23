@@ -51,7 +51,7 @@
             </button>
 
             @guest
-                <a href="{{ route('login') }}"    class="btn btn--ghost btn--sm">Sign In</a>
+                <a href="{{ route('login') }}"    class="btn btn--ghostsg btn--sm">Sign In</a>
                 <a href="{{ route('register') }}" class="btn btn--primary btn--sm">Get Started</a>
             @endguest
 
@@ -93,7 +93,7 @@
                         @role('mentor')
                         <a href="{{ route('mentor.gigs.index') }}" class="nav__dropdown-item">
                             <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 3h12v10H2z" stroke="currentColor" stroke-width="1.5"/><path d="M5 6h6M5 9h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-                            My Gigs
+                            My Gigs 
                         </a>
                         @endrole
                         <div class="nav__dropdown-divider"></div>
@@ -102,7 +102,7 @@
                             <button type="button" class="nav__dropdown-item nav__dropdown-item--danger" onclick="confirmLogout('logoutFormDesktop')">
                                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3H3v10h3M6 8h7m0 0l-3-3m3 3l-3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                                 Sign Out
-                            </button>
+                            </button>  
                         </form>
                     </div>
                 </div>

@@ -13,10 +13,12 @@
             <span class="breadcrumb__item breadcrumb__item--current">{{ $user->full_name }}</span>
         </nav>
 
-        <div style="display:grid; grid-template-columns:1fr; gap:2rem; max-width:900px; margin:0 auto">
-            @media(min-width:768px) {
-                <style>.profile-view-grid { grid-template-columns: 280px 1fr !important; }</style>
+        <div style="display:grid; grid-template-columns:1fr; gap:2rem; max-width:1100px; margin:0 auto; width:100%">
+            <style>
+            @media(min-width:1024px) {
+                .profile-view-grid { grid-template-columns: 280px 1fr !important; }
             }
+            </style>
 
             {{-- ── LEFT SIDEBAR ── --}}
             <div class="profile-view-grid" style="display:grid; grid-template-columns:1fr; gap:2rem; align-items:start">
@@ -274,11 +276,4 @@
     </div>
 </section>
 
-<style>
-@media (min-width: 768px) {
-    .profile-view-grid {
-        grid-template-columns: 280px 1fr !important;
-    }
-}
-</style>
 @endsection

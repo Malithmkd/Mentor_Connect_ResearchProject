@@ -15,6 +15,13 @@
                 </p>
             </div>
             <div style="display:flex;gap:.75rem">
+                @if($enrollment && !$enrollment->isCompleted())
+                    <form action="{{ route('mentor.lms.enrollments.complete', $enrollment) }}" method="POST" onsubmit="return confirm('Are you sure you want to mark this course as completed for the freelancer?');">
+                        @csrf
+                        @method('PATCH')
+                        <button type="submit" class="btn btn--primary btn--sm">✔️ Mark Course Complete</button>
+                    </form>
+                @endif
                 <a href="{{ route('mentor.lms.courses.edit', $course) }}" class="btn btn--secondary btn--sm">✏️ Edit Course</a>
                 <a href="{{ route('mentor.lms.courses.index', $course->relationship) }}" class="btn btn--ghost btn--sm">← Courses</a>
             </div>

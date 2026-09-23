@@ -87,7 +87,7 @@
                         @error('duration_minutes')<span class="form__error">{{ $message }}</span>@enderror
                     </div>
                     <div class="form__group">
-                        <label for="price" class="form__label">Price ($)</label>
+                        <label for="price" class="form__label">Price (Rs)</label>  
                         <input type="number" id="price" name="price" class="form__input @error('price') form__input--error @enderror" value="{{ old('price') }}" required min="0" step="0.01" placeholder="0.00">
                         @error('price')<span class="form__error">{{ $message }}</span>@enderror
                     </div>

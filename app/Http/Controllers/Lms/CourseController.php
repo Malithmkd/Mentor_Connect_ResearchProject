@@ -155,4 +155,18 @@ class CourseController extends Controller
 
         return view('mentor.lms.courses.show', compact('course', 'enrollment'));
     }
+
+    /**
+     * Mark an enrollment as manually completed by the mentor.
+     */
+    public function completeEnrollment(Enrollment $enrollment): RedirectResponse
+    {
+        abort_if(auth()->id() !== $enrollment->course->mentor_id, 403);
+
+        if (!$enrollment->isCompleted()) {
+            $enrollment->update(['completed_at' => now()]);
+        }
+
+        return back()->with('success', 'Course marked as completed for the freelancer.');
+    }
 }

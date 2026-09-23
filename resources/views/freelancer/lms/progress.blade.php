@@ -26,7 +26,18 @@
         @include('partials.flash')
 
         {{-- ── KPI strip ─────────────────────────────────────────────── --}}
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;margin-bottom:2rem">
+        <style>
+            .kpi-grid { display: grid; grid-template-columns: 1fr; gap: 1.25rem; margin-bottom: 2rem; }
+            .chart-grid { display: grid; grid-template-columns: 1fr; gap: 1.5rem; margin-bottom: 1.5rem; align-items: start; }
+            @media (min-width: 768px) {
+                .kpi-grid { grid-template-columns: repeat(3, 1fr); }
+                .chart-grid { grid-template-columns: 1fr 2fr; }
+            }
+            @media (min-width: 1024px) {
+                /* Can add more specific desktop styling if needed */
+            }
+        </style>
+        <div class="kpi-grid">
             <div class="panel" style="text-align:center">
                 <div class="panel__body">
                     <p style="font-size:2.5rem;font-weight:800;color:var(--color-primary)">{{ $enrollment->progress_percentage }}%</p>
@@ -48,7 +59,7 @@
         </div>
 
         {{-- ── Row 1: Doughnut + Bar ───────────────────────────────────── --}}
-        <div style="display:grid;grid-template-columns:1fr 2fr;gap:1.5rem;margin-bottom:1.5rem;align-items:start">
+        <div class="chart-grid">
 
             {{-- Doughnut — Overall --}}
             <div class="panel">

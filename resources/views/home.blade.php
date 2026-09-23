@@ -26,7 +26,7 @@
                 <a href="{{ route('gigs.index') }}" class="btn btn--primary btn--lg" style="border-radius:12px; padding:0.9rem 1.75rem; font-weight:700; box-shadow:0 8px 25px rgba(79,70,229,0.35);">
                     Find a Mentor Now →
                 </a>
-                <a href="{{ route('register') }}" class="btn btn--ghost btn--lg" style="border-radius:12px; padding:0.9rem 1.75rem; font-weight:600;">
+                <a href="{{ route('register') }}" class="btn btn--ghosts btn--lg" style="border-radius:12px; padding:0.9rem 1.75rem; font-weight:600;">
                     Become a Mentor →
                 </a> 
             </div>

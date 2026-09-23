@@ -19,7 +19,7 @@
         <div class="profile__card" style="max-width: 700px;">
             <form method="POST" action="{{ route('mentor.gigs.update', $gig) }}" class="form" enctype="multipart/form-data">
                 @csrf
-                @method('PUT')
+                @method('PATCH')
 
                 <div class="form__group">
                     <label for="title" class="form__label">Session Title</label>
@@ -90,7 +90,7 @@
                         @error('duration_minutes')<span class="form__error">{{ $message }}</span>@enderror
                     </div>
                     <div class="form__group">
-                        <label for="price" class="form__label">Price ($)</label>
+                        <label for="price" class="form__label">Price (Rs)</label>
                         <input type="number" id="price" name="price" class="form__input @error('price') form__input--error @enderror" value="{{ old('price', $gig->price) }}" required min="0" step="0.01" placeholder="0.00">
                         @error('price')<span class="form__error">{{ $message }}</span>@enderror
                     </div>
